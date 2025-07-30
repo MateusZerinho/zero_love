@@ -6,21 +6,101 @@
     <title>Zero Love</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.scss">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
     <header class="hero">
+        <div class="hearts-container">
+            <!-- Corações cairão aqui dinamicamente -->
+        </div>
         <div class="container">
             <img class="hero__logo" src="./images/zero_love.png" alt="logo love">
             <p class="hero__text">
-                O maior evento de tecnologia do Brasil comeca em 10d 13h 29m 13s
+                O aniversário de namoro do melhor casal começa daqui <span id="contador"></span>
             </p>
+            <div class="infos-bar">
+                <ul class="infos-bar__infos">
+                    <li class="infos-bar__infos__item">
+                        <b>Onde vai ser?</b>
+                        Casa do zero
+                    </li>
+                    <li class="infos-bar__infos__item">
+                        <b>O que levar?</b>
+                        Trazer presentes
+                    </li>
+                    <li class="infos-bar__infos__item">
+                        <b>Quando?</b>
+                        05/10/2025 as 15hrs
+                    </li>
+                </ul>
+                <a href="#" class="button button--primary">
+                    <i data-feather="map-pin"></i>
+                    Ver localização
+                </a>
+            </div>
         </div>
     </header>
 
+    <section class="event event--pequenos_momentos">
+        <div class="container" data-aos="zoom-in-right">
+            <div class="event__details">
+                <h2 class="event__details__title">Pequenos Momentos</h2>
+                <p class="event__details__description">
+                    Eu nunca fui bom com palavras ou em demonstrar sentimentos, mas estar contigo me faz querer tentar. Essa foto foi tirada em 15 de julho de 2025, voltando do aniversário da Ana. Pode parecer só uma lembrança comum... mas pra mim, é um dos nossos pequenos grandes momentos.
+                </p>
+            </div>
+            <img class="event__image" src="./images/1.jpeg" alt="aniversario">
+        </div>
+    </section>
+    <section class="event event--ux-ui event--image-left">
+        <div class="container" data-aos="fade-left">
+            <div class="event__details">
+                <h2 class="event__details__title">Nosso Jeito de Estar Juntos</h2>
+                <p class="event__details__description">
+                    No dia 7 de junho de 2025, fomos ao casamento de um parente seu. Eu nem sabia direito como me vestir, mas estava feliz — só por ir ao seu lado. A gente combina em tanta coisa, até quando o dia é dos outros, ele acaba sendo especial pra mim por estar contigo.
+                </p>
+            </div>
+            <img class="event__image" src="./images/2.jpeg" alt="casamento">
+        </div>
+    </section>
+    <section class="event event--data-science">
+        <div class="container" data-aos="fade-right">
+            <div class="event__details">
+                <h2 class="event__details__title">Entre o Mar e o Nosso Mundo</h2>
+                <p class="event__details__description">
+                    Essa foi tirada em 12 de fevereiro de 2025, depois de um dia incrível na Surfland em Garopaba. Nossa primeira "viagem" juntos e aquela sensação de que tudo está certo. Cada memória com você parece um dado importante que só o meu coração entende.
+                </p>
+            </div>
+            <img class="event__image" src="./images/3.jpeg" alt="surfland">
+        </div>
+    </section>
+    <section class="event event--backend event--image-left">
+        <div class="container" data-aos="zoom-out-left">
+            <div class="event__details">
+                <h2 class="event__details__title">Abraçado por você, desde sempre</h2>
+                <p class="event__details__description">
+                    Voltando do aniversário da Ana de novo, só que dessa vez foi em 19 de julho de 2024. A gente nem imaginava tudo que ainda viveria junto. Fui com o moletom que você customizou pra mim, cheio de beijos seus — como se cada um deles me abraçasse o tempo todo. Isso sempre me lembra das cartinhas também 😭
+                </p>
+            </div>
+            <img class="event__image" src="./images/4.jpeg" alt="aniversario1">
+        </div>
+    </section>
+    <section class="event event--fantasia">
+        <div class="container" data-aos="zoom-out-right">
+            <div class="event__details">
+                <h2 class="event__details__title">O Início Imperfeito do Perfeito</h2>
+                <p class="event__details__description">
+                    Essa foi nossa primeira foto juntos. Eu nem gosto dela (e você adora), mas ela marca o começo de tudo. E mesmo que não seja minha preferida, é especial. Porque foi o início de algo que hoje eu não trocaria por nada.
+                </p>
+            </div>
+            <img class="event__image" src="./images/5.jpeg" alt="fantasia">
+        </div>
+    </section>
 
-
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="scripts/main.js"></script>
 </body>
 </html>

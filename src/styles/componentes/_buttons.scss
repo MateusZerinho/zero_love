@@ -1,0 +1,35 @@
+@use '../variables';
+
+.button {
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2.2;
+        vertical-align: middle;
+    }
+
+    &--primary {
+        color: variables.$textColor;
+        background-color: variables.$buttonColor;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 640px) {
+        width: 100%;
+        justify-content: center;
+    }
+
+    @media (max-width: 1024px) {
+        justify-content: center;
+    }
+}
