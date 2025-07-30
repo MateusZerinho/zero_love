@@ -44,14 +44,17 @@
         padding: 40px 0;
 
         &__logo {
-            height: 40px;
+            height: 60px;
+            margin-bottom: 16px;
         }
 
         &__text {
-            font-weight: 22px;
-            line-height: 24px;
-
-            margin: 24px 0;
+            font-size: 22px;
+            line-height: 30px;
+            margin: 16px 0;
+            padding: 0 12px;       
+            text-align: center;
+            word-wrap: break-word;
         }
     }
 }
