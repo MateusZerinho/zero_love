@@ -3,6 +3,7 @@
 .event {
     padding: 80px 0;
     transition: all 0.4s ease;
+    overflow-x: hidden;
 
     &--pequenos_momentos {
         background-image: linear-gradient(variables.$cor1, variables.$cor2);
