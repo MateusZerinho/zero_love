@@ -49,3 +49,41 @@ function createHeart() {
 }
 
 setInterval(createHeart, 300);
+
+document.addEventListener('DOMContentLoaded', function () {
+    const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) return;
+
+    const descriptions = document.querySelectorAll('.event__details__description');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+        const container = entry.target.closest('.container');
+        const image = container?.querySelector('.event__image');
+        if (!image) return;
+
+        if (entry.isIntersecting) {
+            image.classList.add('event__image--active');
+        } else {
+            image.classList.remove('event__image--active');
+        }
+        });
+    }, {
+        root: null,
+        rootMargin: '0px 0px -40% 0px',
+        threshold: 0
+    });
+
+    descriptions.forEach(desc => {
+        observer.observe(desc);
+
+        // 🔹 Checagem inicial para já ativar se estiver visível ao carregar
+        const rect = desc.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom >= 0) {
+        const container = desc.closest('.container');
+        const image = container?.querySelector('.event__image');
+        if (image) image.classList.add('event__image--active');
+        }
+    });
+    descriptions.forEach(desc => observer.observe(desc));
+});

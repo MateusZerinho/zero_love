@@ -118,3 +118,12 @@
         }
     }
 }
+
+.event__image {
+    transition: transform 0.3s ease, opacity 0.6s ease;
+    transform: translateY(20px);
+}
+
+.event__image.event__image--active {
+    transform: translateY(0) scale(1.03);
+}
