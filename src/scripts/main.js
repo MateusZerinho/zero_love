@@ -87,3 +87,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     descriptions.forEach(desc => observer.observe(desc));
 });
+
+window.addEventListener("scroll", () => {
+    const bar = document.querySelector(".spotify-bar");
+    if (window.scrollY > 200) { // quando passar de 200px
+        bar.classList.add("top");
+    } else {
+        bar.classList.remove("top");
+    }
+});

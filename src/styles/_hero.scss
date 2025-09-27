@@ -116,12 +116,16 @@
 }
 
 .spotify-bar {
-    position: sticky;
-    bottom: 0;   // começa embaixo
-    top: 0;      // quando rolar, gruda no topo
+    position: fixed;
+    bottom: 0;
     width: 100%;
+    transition: all 0.4s ease;
     z-index: 999;
-    background: #121212; // fundo para destacar
+
+    &.top {
+        bottom: auto;
+        top: 0;
+    }
 
     iframe {
         width: 100%;
