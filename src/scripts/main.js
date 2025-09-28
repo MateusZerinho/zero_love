@@ -88,11 +88,47 @@ document.addEventListener('DOMContentLoaded', function () {
     descriptions.forEach(desc => observer.observe(desc));
 });
 
-window.addEventListener("scroll", () => {
-    const bar = document.querySelector(".spotify-bar");
-    if (window.scrollY > 200) { // quando passar de 200px
-        bar.classList.add("top");
-    } else {
-        bar.classList.remove("top");
+document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('spotifyBar');
+    const wrapper = bar.parentElement; // .spotify-wrapper
+
+    // cria um spacer logo após o wrapper para preservar o espaço quando a barra fica fixed
+    const spacer = document.createElement('div');
+    spacer.className = 'spotify-spacer';
+    wrapper.parentNode.insertBefore(spacer, wrapper.nextSibling);
+
+    // calcula o ponto de gatilho (quando a barra encosta no topo)
+    let triggerPoint = wrapper.getBoundingClientRect().top + window.scrollY;
+
+    function updateTrigger() {
+        // recalcula sempre que necessário (resize, conteúdo dinâmico)
+        triggerPoint = wrapper.getBoundingClientRect().top + window.scrollY;
     }
+
+    function onScroll() {
+    // pequena folga (12px) para ficar exatamente igual ao top no CSS
+    const offset = 12;
+    if (window.scrollY >= triggerPoint - offset) {
+        if (!bar.classList.contains('fixed')) {
+            // aplica fixed e mantém espaço no fluxo com o spacer
+            bar.classList.add('fixed');
+            spacer.style.height = bar.offsetHeight + 'px';
+            spacer.style.display = 'block';
+        }
+    } else {
+        if (bar.classList.contains('fixed')) {
+            // remove fixed e remove spacer
+            bar.classList.remove('fixed');
+            spacer.style.display = 'none';
+            spacer.style.height = '0';
+        }
+        }
+    }
+
+    // eventos
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => { updateTrigger(); onScroll(); });
+
+    // se houver imagens ou conteúdo carregando que mudem layout, recalcule depois de um tempo
+    window.setTimeout(updateTrigger, 500);
 });
