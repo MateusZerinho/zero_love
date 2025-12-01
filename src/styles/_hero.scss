@@ -1,9 +1,9 @@
 @use 'variables';
 
 .hero {
-    padding-top: 64px;
+    padding-top: 134px;
     padding-bottom: 100px;
-    background-image: url(../images/coracao_fundo.png);
+    background-image: url(../images/sophia_fundo.png);
     background-repeat: no-repeat;
     background-size: cover;
     position: relative;
@@ -56,6 +56,12 @@
             text-align: center;
             word-wrap: break-word;
         }
+    }
+}
+
+@media (max-width: 640px) {
+    .hero {
+        background-position: 18% top;
     }
 }
 

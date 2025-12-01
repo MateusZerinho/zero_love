@@ -2,7 +2,7 @@ feather.replace();
 
 AOS.init();
 
-const dataDoEvento = new Date("Nov 5, 2026 15:00:00");
+const dataDoEvento = new Date("Nov 5, 2026 00:00:00");
 const timeStampDoEvento = dataDoEvento.getTime();
 
 const contaAsHoras = setInterval(function() {
