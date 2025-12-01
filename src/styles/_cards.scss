@@ -1,0 +1,62 @@
+.sectionPai {
+    background-image: url(../images/coracao_fundo.png);
+    width: 100%;
+    height: 100vh;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    gap: 40px;
+
+    h1 {
+        font-size: 40px;
+        font-family: "Pacifico", cursive;
+    }
+}
+
+.divCards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(30px);
+    border-radius: 24px;
+    padding: 32px 20px;
+    position: absolute;
+    width: 340px;
+
+    h2 {
+        font-size: 40px;
+    }
+
+    p {
+        opacity: .75;
+    }
+
+    h3 {
+        font-size: 56px;
+        font-weight: 300;
+        text-align: end;
+        margin-top: 32px;
+    }
+}
+
+.card1 {
+    z-index: 2;
+}
+
+.card2 {
+    transform: translateX(60%);
+    scale: .8;
+}
+
+.card3 {
+    transform: translateX(-60%);
+    scale: .8;
+}

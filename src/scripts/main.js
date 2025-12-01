@@ -132,3 +132,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // se houver imagens ou conteúdo carregando que mudem layout, recalcule depois de um tempo
     window.setTimeout(updateTrigger, 500);
 });
+
+// Cards Animados
+gsap.registerPlugin(ScrollTrigger)
+
+const tl = gsap.timeline({
+    scrollTrigger: {
+        start: "50% 50%",
+        end: "90% 50%",
+        scrub: true,
+        pin: ".sectionPai"
+    }
+})
+
+// Primeiro movimento dos cards
+tl.to(".card1", {
+    x: "-60%",
+    scale: ".8",
+})
+
+tl.to(".card2", {
+    x: "0%",
+    scale: "1",
+    zIndex: 2
+}, "-=.5")
+
+tl.to(".card3", {
+    x: "60%",
+}, "-=.5")
+
+// Segundo movimento dos cards
+tl.to(".card2", {
+    x: "-60%",
+    scale: ".8",
+})
+
+tl.to(".card3", {
+    x: "0%",
+    scale: "1",
+    zIndex: 2
+}, "-=.5")
+
+tl.to(".card1", {
+    x: "60%",
+    zIndex: 0
+}, "-=.5")
