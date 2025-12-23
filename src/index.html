@@ -12,118 +12,143 @@
     <link rel="icon" href="./images/zero_icone.png" type="image/png">
 </head>
 <body>
-    <header class="hero">
-        <div class="hearts-container">
-            <!-- Corações cairão aqui dinamicamente -->
-        </div>
-        <div class="container">
-            <img class="hero__logo" src="./images/zero_love.png" alt="logo love">
-            <p class="hero__text">
-                O aniversário de namoro do melhor casal começa daqui <span id="contador"></span>
-            </p>
-            <!-- wrapper mantém a barra centralizada na posição natural -->
-            <div class="spotify-wrapper">
-                <div class="spotify-bar" id="spotifyBar">
-                    <iframe 
-                    data-testid="embed-iframe"
-                    style="border-radius:12px"
-                    src="https://open.spotify.com/embed/playlist/7eHbLsS1ATUv95L4JgjhvO?utm_source=generator"
-                    width="100%" height="80" frameborder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy">
-                    </iframe>
+    <div id="smooth-wrapper">
+        <div id="smooth-content">
+            <header class="hero">
+                <div class="hearts-container">
+                    <!-- Corações cairão aqui dinamicamente -->
                 </div>
-            </div>
-        </div>
-    </header>
+                <div class="container">
+                    <img class="hero__logo" src="./images/zero_love.png" alt="logo love">
+                    <p class="hero__text">
+                        O aniversário de namoro do melhor casal começa daqui <span id="contador"></span>
+                    </p>
+                    <!-- wrapper mantém a barra centralizada na posição natural -->
+                    <div class="spotify-wrapper">
+                        <div class="spotify-bar" id="spotifyBar">
+                            <iframe 
+                            data-testid="embed-iframe"
+                            style="border-radius:12px"
+                            src="https://open.spotify.com/embed/playlist/7eHbLsS1ATUv95L4JgjhvO?utm_source=generator"
+                            width="100%" height="80" frameborder="0"
+                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-    <section class="event event--pequenos_momentos">
-        <div class="container" data-aos="zoom-in-right">
-            <div class="event__details">
-                <h2 class="event__details__title">Pequenos Momentos</h2>
-                <p class="event__details__description">
-                    Eu nunca fui bom com palavras ou em demonstrar sentimentos, mas estar contigo me faz querer tentar. Essa foto foi tirada em 15 de julho de 2025, voltando do aniversário da Ana. Pode parecer só uma lembrança comum... mas pra mim, é um dos nossos pequenos grandes momentos.
-                </p>
-            </div>
-            <img class="event__image" src="./images/1.jpeg" alt="aniversario">
-        </div>
-    </section>
-    <section class="event event--ux-ui event--image-left">
-        <div class="container" data-aos="fade-left">
-            <div class="event__details">
-                <h2 class="event__details__title">Nosso Jeito de Estar Juntos</h2>
-                <p class="event__details__description">
-                    No dia 7 de junho de 2025, fomos ao casamento de um parente seu. Eu nem sabia direito como me vestir, mas estava feliz — só por ir ao seu lado. A gente combina em tanta coisa, até quando o dia é dos outros, ele acaba sendo especial pra mim por estar contigo.
-                </p>
-            </div>
-            <img class="event__image" src="./images/2.jpeg" alt="casamento">
-        </div>
-    </section>
-    <section class="event event--data-science">
-        <div class="container" data-aos="fade-right">
-            <div class="event__details">
-                <h2 class="event__details__title">Entre o Mar e o Nosso Mundo</h2>
-                <p class="event__details__description">
-                    Essa foi tirada em 12 de fevereiro de 2025, depois de um dia incrível na Surfland em Garopaba. Nossa primeira "viagem" juntos e aquela sensação de que tudo está certo. Cada memória com você parece um dado importante que só o meu coração entende.
-                </p>
-            </div>
-            <img class="event__image" src="./images/3.jpeg" alt="surfland">
-        </div>
-    </section>
-    <section class="event event--backend event--image-left">
-        <div class="container" data-aos="zoom-out-left">
-            <div class="event__details">
-                <h2 class="event__details__title">Abraçado por você, desde sempre</h2>
-                <p class="event__details__description">
-                    Voltando do aniversário da Ana de novo, só que dessa vez foi em 19 de julho de 2024. A gente nem imaginava tudo que ainda viveria junto. Fui com o moletom que você customizou pra mim, cheio de beijos seus — como se cada um deles me abraçasse o tempo todo. Isso sempre me lembra das cartinhas também 😭
-                </p>
-            </div>
-            <img class="event__image" src="./images/4.jpeg" alt="aniversario1">
-        </div>
-    </section>
-    <section class="event event--fantasia">
-        <div class="container" data-aos="zoom-out-right">
-            <div class="event__details">
-                <h2 class="event__details__title">O Início Imperfeito do Perfeito</h2>
-                <p class="event__details__description">
-                    Essa foi nossa primeira foto juntos. Eu nem gosto dela (e você adora), mas ela marca o começo de tudo. E mesmo que não seja minha preferida, é especial. Porque foi o início de algo que hoje eu não trocaria por nada.
-                </p>
-            </div>
-            <img class="event__image" src="./images/5.jpeg" alt="fantasia">
-        </div>
-    </section>
+            <section class="event event--pequenos_momentos">
+                <div class="container" data-aos="zoom-in-right">
+                    <div class="event__details">
+                        <h2 class="event__details__title">Pequenos Momentos</h2>
+                        <p class="event__details__description">
+                            Eu nunca fui bom com palavras ou em demonstrar sentimentos, mas estar contigo me faz querer tentar. Essa foto foi tirada em 15 de julho de 2025, voltando do aniversário da Ana. Pode parecer só uma lembrança comum... mas pra mim, é um dos nossos pequenos grandes momentos.
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/1.jpeg" alt="aniversario">
+                </div>
+            </section>
+            <section class="event event--ux-ui event--image-left">
+                <div class="container" data-aos="fade-left">
+                    <div class="event__details">
+                        <h2 class="event__details__title">Nosso Jeito de Estar Juntos</h2>
+                        <p class="event__details__description">
+                            No dia 7 de junho de 2025, fomos ao casamento de um parente seu. Eu nem sabia direito como me vestir, mas estava feliz — só por ir ao seu lado. A gente combina em tanta coisa, até quando o dia é dos outros, ele acaba sendo especial pra mim por estar contigo.
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/2.jpeg" alt="casamento">
+                </div>
+            </section>
+            <section class="event event--data-science">
+                <div class="container" data-aos="fade-right">
+                    <div class="event__details">
+                        <h2 class="event__details__title">Entre o Mar e o Nosso Mundo</h2>
+                        <p class="event__details__description">
+                            Essa foi tirada em 12 de fevereiro de 2025, depois de um dia incrível na Surfland em Garopaba. Nossa primeira "viagem" juntos e aquela sensação de que tudo está certo. Cada memória com você parece um dado importante que só o meu coração entende.
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/3.jpeg" alt="surfland">
+                </div>
+            </section>
+            <section class="event event--backend event--image-left">
+                <div class="container" data-aos="zoom-out-left">
+                    <div class="event__details">
+                        <h2 class="event__details__title">Abraçado por você, desde sempre</h2>
+                        <p class="event__details__description">
+                            Voltando do aniversário da Ana de novo, só que dessa vez foi em 19 de julho de 2024. A gente nem imaginava tudo que ainda viveria junto. Fui com o moletom que você customizou pra mim, cheio de beijos seus — como se cada um deles me abraçasse o tempo todo. Isso sempre me lembra das cartinhas também 😭
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/4.jpeg" alt="aniversario1">
+                </div>
+            </section>
+            <section class="event event--fantasia">
+                <div class="container" data-aos="zoom-out-right">
+                    <div class="event__details">
+                        <h2 class="event__details__title">O Início Imperfeito do Perfeito</h2>
+                        <p class="event__details__description">
+                            Essa foi nossa primeira foto juntos. Eu nem gosto dela (e você adora), mas ela marca o começo de tudo. E mesmo que não seja minha preferida, é especial. Porque foi o início de algo que hoje eu não trocaria por nada.
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/5.jpeg" alt="fantasia">
+                </div>
+            </section>
 
-    <section class="sectionPai">
-        <h1>Cards Animados</h1>
-        <div class="divCards">
-            <div class="card card1">
-                <h2>Lorem</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-                <h3>01</h3>
-            </div>
-            <div class="card card2">
-                <h2>Lorem</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-                <h3>02</h3>
-            </div>
-            <div class="card card3">
-                <h2>Lorem</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-                <h3>03</h3>
-            </div>
+            <section class="sectionPai">
+                <!-- Vídeo de fundo -->
+                <video class="bg-video" autoplay muted loop playsinline>
+                    <source src="./images/Hearts_Background_Loop.mp4" type="video/mp4">
+                    Seu navegador não suporta vídeos.
+                </video>
+
+                <h1>Cards Animados</h1>
+                <div class="divCards">
+                    <div class="card card1">
+                        <h2>Lorem</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        </p>
+                        <h3>01</h3>
+                    </div>
+                    <div class="card card2">
+                        <h2>Lorem</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        </p>
+                        <h3>02</h3>
+                    </div>
+                    <div class="card card3">
+                        <h2>Lorem</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        </p>
+                        <h3>03</h3>
+                    </div>
+                </div>
+            </section>
+            <section class="event event--pequenos_momentos">
+                <div class="container" data-aos="zoom-in-right">
+                    <div class="event__details">
+                        <h2 class="event__details__title">Pequenos Momentos</h2>
+                        <p class="event__details__description">
+                            Eu nunca fui bom com palavras ou em demonstrar sentimentos, mas estar contigo me faz querer tentar. Essa foto foi tirada em 15 de julho de 2025, voltando do aniversário da Ana. Pode parecer só uma lembrança comum... mas pra mim, é um dos nossos pequenos grandes momentos.
+                        </p>
+                    </div>
+                    <img class="event__image" src="./images/1.jpeg" alt="aniversario">
+                </div>
+            </section>
         </div>
-    </section>
+    </div>
+    
 
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
+    <!-- ScrollSmoother requires ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollSmoother.min.js"></script>
     <script src="scripts/main.js"></script>
 </body>
 </html>

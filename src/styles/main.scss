@@ -15,6 +15,11 @@
     list-style: none;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 .container {
     max-width: 960px;
     width: 100%;
@@ -27,4 +32,10 @@
     @media (max-width: 1024px) {
         max-width: 90%;
     }
+}
+
+/* Chrome, Edge, Safari */
+body::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
 }

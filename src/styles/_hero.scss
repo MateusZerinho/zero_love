@@ -129,12 +129,11 @@
 /* Barra no fluxo natural, abaixo do contador */
 .spotify-bar {
     width: min(920px, 100%);
-    max-width: 920px;
     margin-top: 18px;
     border-radius: 12px;
     overflow: hidden;
     background: #121212;
-    transition: all .3s ease;
+    z-index: 10;
 }
 
 /* iframe interno */
@@ -145,18 +144,7 @@
     display: block;
 }
 
-/* Quando a barra virar fixa no topo */
-.spotify-bar.fixed {
-    position: fixed;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%) scale(0.95); /* começa levemente menor */
-    width: min(920px, 90%);
-    z-index: 10000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    border-radius: 12px;
-    animation: stickyEnter .4s ease forwards;
-}
+
 
 /* Keyframes da animação de entrada */
 @keyframes stickyEnter {

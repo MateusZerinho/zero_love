@@ -1,179 +1,199 @@
+// ===============================
+// Plugins externos
+// ===============================
 feather.replace();
-
 AOS.init();
 
+// ===============================
+// Contador de tempo
+// ===============================
 const dataDoEvento = new Date("Nov 5, 2026 00:00:00");
 const timeStampDoEvento = dataDoEvento.getTime();
 
-const contaAsHoras = setInterval(function() {
-    const agora = new Date();
-    const timeStampAtual = agora.getTime();
-
-    const distanciaAteOEvento = timeStampDoEvento - timeStampAtual;
+const contaAsHoras = setInterval(function () {
+    const agora = new Date().getTime();
+    const distanciaAteOEvento = timeStampDoEvento - agora;
 
     const diaEmMs = 1000 * 60 * 60 * 24;
     const horaEmMs = 1000 * 60 * 60;
     const minutoEmMs = 1000 * 60;
 
-    const diasAteOEvento = Math.floor(distanciaAteOEvento / diaEmMs);
-    const horasAteOEvento = Math.floor((distanciaAteOEvento % diaEmMs) / horaEmMs);
-    const minutosAteOEvento = Math.floor((distanciaAteOEvento % horaEmMs) / minutoEmMs);
-    const segundosAteOEvento = Math.floor((distanciaAteOEvento % minutoEmMs) / 1000);
+    const dias = Math.floor(distanciaAteOEvento / diaEmMs);
+    const horas = Math.floor((distanciaAteOEvento % diaEmMs) / horaEmMs);
+    const minutos = Math.floor((distanciaAteOEvento % horaEmMs) / minutoEmMs);
+    const segundos = Math.floor((distanciaAteOEvento % minutoEmMs) / 1000);
 
-    document.getElementById('contador').innerHTML = `${diasAteOEvento}d ${horasAteOEvento}h ${minutosAteOEvento}m ${segundosAteOEvento}s`;
+    const contador = document.getElementById("contador");
+
+    if (contador) {
+        contador.innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+    }
 
     if (distanciaAteOEvento < 0) {
         clearInterval(contaAsHoras);
-        const paragrafo = document.querySelector('.hero__text');
-        paragrafo.innerHTML = 'O aniversário de namoro do melhor casal já acabou 💔';
+        const texto = document.querySelector(".hero__text");
+        if (texto) {
+            texto.innerHTML = "O aniversário de namoro do melhor casal já acabou 💔";
+        }
     }
 }, 1000);
 
+// ===============================
+// Corações caindo
+// ===============================
 function createHeart() {
-    const container = document.querySelector('.hearts-container');
-    const heart = document.createElement('div');
-    heart.classList.add('heart');
+    const container = document.querySelector(".hearts-container");
+    if (!container) return;
+
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
 
     heart.style.left = `${Math.random() * 100}%`;
-    heart.style.animationDuration = 3 + Math.random() * 3 + 's';
-    
+    heart.style.animationDuration = 3 + Math.random() * 3 + "s";
+
     const angles = [35, 45, 55];
     const randomAngle = angles[Math.floor(Math.random() * angles.length)];
-    heart.style.setProperty('--rotation', `${randomAngle}deg`);
+    heart.style.setProperty("--rotation", `${randomAngle}deg`);
 
     container.appendChild(heart);
 
-    setTimeout(() => {
-        heart.remove();
-    }, 7000);
+    setTimeout(() => heart.remove(), 7000);
 }
 
 setInterval(createHeart, 300);
 
-document.addEventListener('DOMContentLoaded', function () {
-    const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+// ===============================
+// Intersection Observer (mobile)
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
     if (!isTouchDevice) return;
 
-    const descriptions = document.querySelectorAll('.event__details__description');
+    const descriptions = document.querySelectorAll(
+        ".event__details__description"
+    );
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-        const container = entry.target.closest('.container');
-        const image = container?.querySelector('.event__image');
-        if (!image) return;
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                const container = entry.target.closest(".container");
+                const image = container?.querySelector(".event__image");
+                if (!image) return;
 
-        if (entry.isIntersecting) {
-            image.classList.add('event__image--active');
-        } else {
-            image.classList.remove('event__image--active');
+                if (entry.isIntersecting) {
+                    image.classList.add("event__image--active");
+                } else {
+                    image.classList.remove("event__image--active");
+                }
+            });
+        },
+        {
+            rootMargin: "0px 0px -40% 0px",
+            threshold: 0
         }
-        });
-    }, {
-        root: null,
-        rootMargin: '0px 0px -40% 0px',
-        threshold: 0
-    });
+    );
 
-    descriptions.forEach(desc => {
+    descriptions.forEach((desc) => {
         observer.observe(desc);
 
-        // 🔹 Checagem inicial para já ativar se estiver visível ao carregar
+        // ativação inicial
         const rect = desc.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom >= 0) {
-        const container = desc.closest('.container');
-        const image = container?.querySelector('.event__image');
-        if (image) image.classList.add('event__image--active');
+            const container = desc.closest(".container");
+            const image = container?.querySelector(".event__image");
+            if (image) image.classList.add("event__image--active");
         }
     });
-    descriptions.forEach(desc => observer.observe(desc));
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const bar = document.getElementById('spotifyBar');
-    const wrapper = bar.parentElement; // .spotify-wrapper
+// ===============================
+// GSAP + ScrollSmoother
+// ===============================
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
-    // cria um spacer logo após o wrapper para preservar o espaço quando a barra fica fixed
-    const spacer = document.createElement('div');
-    spacer.className = 'spotify-spacer';
-    wrapper.parentNode.insertBefore(spacer, wrapper.nextSibling);
-
-    // calcula o ponto de gatilho (quando a barra encosta no topo)
-    let triggerPoint = wrapper.getBoundingClientRect().top + window.scrollY;
-
-    function updateTrigger() {
-        // recalcula sempre que necessário (resize, conteúdo dinâmico)
-        triggerPoint = wrapper.getBoundingClientRect().top + window.scrollY;
-    }
-
-    function onScroll() {
-    // pequena folga (12px) para ficar exatamente igual ao top no CSS
-    const offset = 12;
-    if (window.scrollY >= triggerPoint - offset) {
-        if (!bar.classList.contains('fixed')) {
-            // aplica fixed e mantém espaço no fluxo com o spacer
-            bar.classList.add('fixed');
-            spacer.style.height = bar.offsetHeight + 'px';
-            spacer.style.display = 'block';
-        }
-    } else {
-        if (bar.classList.contains('fixed')) {
-            // remove fixed e remove spacer
-            bar.classList.remove('fixed');
-            spacer.style.display = 'none';
-            spacer.style.height = '0';
-        }
-        }
-    }
-
-    // eventos
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => { updateTrigger(); onScroll(); });
-
-    // se houver imagens ou conteúdo carregando que mudem layout, recalcule depois de um tempo
-    window.setTimeout(updateTrigger, 500);
+// ScrollSmoother (IDs CORRETOS)
+const smoother = ScrollSmoother.create({
+    wrapper: "#smooth-wrapper",
+    content: "#smooth-content",
+    smooth: 2,
+    effects: true,
+    normalizeScroll: true,
+    smoothTouch: 0.1
 });
 
-// Cards Animados
-gsap.registerPlugin(ScrollTrigger)
+// ===============================
+// Barra do Spotify fixa (GSAP pin)
+// ===============================
+ScrollTrigger.create({
+    trigger: ".spotify-wrapper",
+    start: "top top+=12",
+    end: () => "+=" + document.body.scrollHeight,
+    pin: "#spotifyBar",
+    pinSpacing: false,
+    invalidateOnRefresh: true
+});
 
+// ===============================
+// Cards animados
+// ===============================
 const tl = gsap.timeline({
     scrollTrigger: {
-        start: "50% 50%",
-        end: "90% 50%",
+        trigger: ".sectionPai",
+        start: "top top",
+        end: "+=150%",
         scrub: true,
-        pin: ".sectionPai"
+        pin: true,
+        anticipatePin: 1
     }
-})
+});
 
-// Primeiro movimento dos cards
+// Primeiro movimento
 tl.to(".card1", {
     x: "-60%",
-    scale: ".8",
-})
+    scale: 0.8
+});
 
-tl.to(".card2", {
-    x: "0%",
-    scale: "1",
-    zIndex: 2
-}, "-=.5")
+tl.to(
+    ".card2",
+    {
+        x: "0%",
+        scale: 1,
+        zIndex: 2
+    },
+    "-=0.5"
+);
 
-tl.to(".card3", {
-    x: "60%",
-}, "-=.5")
+tl.to(
+    ".card3",
+    {
+        x: "60%"
+    },
+    "-=0.5"
+);
 
-// Segundo movimento dos cards
+// Segundo movimento
 tl.to(".card2", {
     x: "-60%",
-    scale: ".8",
-})
+    scale: 0.8
+});
 
-tl.to(".card3", {
-    x: "0%",
-    scale: "1",
-    zIndex: 2
-}, "-=.5")
+tl.to(
+    ".card3",
+    {
+        x: "0%",
+        scale: 1,
+        zIndex: 2
+    },
+    "-=0.5"
+);
 
-tl.to(".card1", {
-    x: "60%",
-    zIndex: 0
-}, "-=.5")
+tl.to(
+    ".card1",
+    {
+        x: "60%",
+        zIndex: 0
+    },
+    "-=0.5"
+);

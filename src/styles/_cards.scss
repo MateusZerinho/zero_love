@@ -1,7 +1,9 @@
 .sectionPai {
-    background-image: url(../images/coracao_fundo.png);
+    position: relative; // MUITO importante
     width: 100%;
     height: 100vh;
+    overflow: hidden;
+
     color: white;
     display: flex;
     flex-direction: column;
@@ -10,10 +12,30 @@
     padding: 40px;
     gap: 40px;
 
+    // OVERLAY ESCURO
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45); // ajuste aqui
+        z-index: 1;
+    }
+
     h1 {
         font-size: 40px;
         font-family: "Pacifico", cursive;
+        z-index: 2;
+        position: relative;
     }
+}
+
+.bg-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
 }
 
 .divCards {
@@ -21,6 +43,8 @@
     justify-content: center;
     align-items: center;
     gap: 24px;
+    position: relative;
+    z-index: 2;
 }
 
 .card {
