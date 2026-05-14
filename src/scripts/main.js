@@ -1,4 +1,25 @@
 // ===============================
+// Pré-loader
+// ===============================
+(function () {
+    const preloader = document.getElementById("preloader");
+    if (!preloader) return;
+ 
+    // Tempo total da animação de preenchimento:
+    // delay (0.4s) + duração (2s) + uma pausa extra antes de sair (0.3s) = ~2.7s
+    const FILL_DURATION = 2700;
+ 
+    setTimeout(function () {
+        preloader.classList.add("preloader--hidden");
+ 
+        // Remove do DOM depois da transição de fade-out (0.8s)
+        setTimeout(function () {
+            preloader.remove();
+        }, 800);
+    }, FILL_DURATION);
+})();
+
+// ===============================
 // Plugins externos
 // ===============================
 feather.replace();

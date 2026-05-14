@@ -12,9 +12,31 @@
     <link rel="icon" href="./images/zero_icone.png" type="image/png">
 </head>
 <body>
+    <!-- =============================== -->
+    <!-- Pré-loader                      -->
+    <!-- =============================== -->
+    <div class="preloader" id="preloader">
+        <div class="preloader__logo">
+            <img class="preloader__outline" src="./images/zero_love.png">
+            <div class="preloader__fill">
+                <div class="preloader__fill-bar"></div>
+            </div>
+        </div>
+    </div>
+    
     <div id="smooth-wrapper">
         <div id="smooth-content">
             <header class="hero">
+                <video
+                    class="hero__bg-video"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    poster="./images/sophia_fundo.png"
+                >
+                    <source src="./images/sophia_fundo_video.mp4" type="video/mp4">
+                </video>
                 <div class="hearts-container">
                     <!-- Corações cairão aqui dinamicamente -->
                 </div>
