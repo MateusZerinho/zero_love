@@ -100,29 +100,3 @@
     transform: translateX(-60%);
     scale: .8;
 }
-
-@media (max-width: 768px) {
-    .sectionPai {
-        height: auto;
-        min-height: 100vh;
-        padding: 80px 20px;
-    }
-
-    .divCards {
-        flex-direction: column;
-        position: relative;
-        min-height: auto;
-    }
-
-    .card,
-    .card1,
-    .card2,
-    .card3 {
-        position: relative;
-        width: 100%;
-        max-width: 340px;
-        min-height: auto;
-        transform: none !important;
-        scale: 1 !important;
-    }
-}
