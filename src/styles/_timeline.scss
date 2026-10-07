@@ -1,0 +1,186 @@
+@use 'variables';
+
+.timeline {
+    background-color: #fff1f3;
+    padding: 80px 0;
+    overflow-x: hidden;
+
+    // O reset global (* { color: $textColor }) deixa tudo branco,
+    // então defini a cor de cada texto explicitamente aqui.
+    &__header {
+        text-align: center;
+        margin-bottom: 64px;
+        padding: 0 20px;
+    }
+
+    &__title {
+        font-family: "Pacifico", cursive;
+        font-weight: 400;
+        font-size: 40px;
+        color: variables.$cor1;
+        margin-bottom: 8px;
+    }
+
+    &__subtitle {
+        font-size: 18px;
+        color: variables.$cor5;
+    }
+
+    &__list {
+        position: relative;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 20px;
+
+        // linha central
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 3px;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            background: linear-gradient(to bottom, variables.$cor2, variables.$cor1);
+            opacity: .5;
+        }
+    }
+
+    &__item {
+        position: relative;
+        width: 50%;
+        padding-right: 56px;
+        margin-bottom: 56px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        // itens pares ficam do lado direito
+        &:nth-child(even) {
+            margin-left: 50%;
+            padding-right: 0;
+            padding-left: 56px;
+
+            .timeline__marker {
+                right: auto;
+                left: -24px;
+            }
+
+            .timeline__card {
+                text-align: left;
+            }
+        }
+    }
+
+    &__marker {
+        position: absolute;
+        top: 24px;
+        right: -24px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: #ffe0e5;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 12px rgba(195, 20, 50, .25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        color: variables.$cor1;
+        z-index: 1;
+    }
+
+    &__card {
+        background-color: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        text-align: right;
+        box-shadow: 0 8px 24px rgba(195, 20, 50, .12);
+        border: 1px solid #ffe3e8;
+    }
+
+    &__image {
+        width: 100%;
+        aspect-ratio: 4 / 3; // reserva o espaço e evita "pulo" de layout
+        object-fit: cover;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    &__date {
+        display: inline-block;
+        padding: 4px 12px;
+        margin-bottom: 12px;
+        border-radius: 999px;
+        background-color: #ffe0e5;
+        color: variables.$cor1;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    &__card-title {
+        font-family: "Pacifico", cursive;
+        font-weight: 400;
+        font-size: 22px;
+        color: #4a2230;
+        margin-bottom: 8px;
+    }
+
+    &__text {
+        font-size: 15px;
+        line-height: 1.6;
+        color: variables.$cor5;
+    }
+
+    // último item: ano em andamento
+    &__item--current &__marker {
+        background-color: variables.$cor1;
+        color: #fff;
+        animation: timelinePulse 2s ease-in-out infinite;
+    }
+
+    @media (max-width: 640px) {
+        padding: 48px 0;
+
+        &__title {
+            font-size: 30px;
+        }
+
+        &__subtitle {
+            font-size: 16px;
+        }
+
+        &__list::before {
+            left: 44px;
+        }
+
+        &__item,
+        &__item:nth-child(even) {
+            width: 100%;
+            margin-left: 0;
+            padding-left: 76px;
+            padding-right: 0;
+            margin-bottom: 40px;
+        }
+
+        &__marker,
+        &__item:nth-child(even) &__marker {
+            left: 20px;
+            right: auto;
+        }
+
+        &__card,
+        &__item:nth-child(even) &__card {
+            text-align: left;
+        }
+    }
+}
+
+@keyframes timelinePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(195, 20, 50, .45); }
+    50%      { box-shadow: 0 0 0 12px rgba(195, 20, 50, 0); }
+}
