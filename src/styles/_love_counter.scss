@@ -1,0 +1,140 @@
+@use 'variables';
+
+// O reset global (* { color: $textColor }) deixa tudo branco,
+// então cada texto tem a cor definida explicitamente aqui.
+.love-counter {
+    position: relative;
+    background-color: #fff1f3;
+    padding: 80px 20px;
+    overflow: hidden;
+
+    &__hearts {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    &__heart {
+        position: absolute;
+        top: -30px;
+        line-height: 1;
+        opacity: 0;
+        animation: loveCounterFall linear forwards;
+    }
+
+    &__header {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 56px;
+    }
+
+    &__title {
+        font-family: "Pacifico", cursive;
+        font-weight: 400;
+        font-size: 48px;
+        color: variables.$cor1;
+        margin-bottom: 16px;
+    }
+
+    &__subtitle {
+        font-family: Roboto, sans-serif;
+        font-size: 18px;
+        line-height: 1.6;
+        color: variables.$cor5;
+        opacity: .85;
+    }
+
+    &__grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 24px;
+        max-width: 1040px;
+        margin: 0 auto;
+    }
+
+    &__box {
+        background-color: #fff;
+        border: 1px solid #ffe3e8;
+        border-radius: 24px;
+        padding: 28px 12px 22px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(195, 20, 50, .08);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        transition: transform .3s ease, box-shadow .3s ease;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 34px rgba(195, 20, 50, .16);
+        }
+    }
+
+    &__number {
+        font-family: "Pacifico", cursive;
+        font-size: 48px;
+        line-height: 1.2;
+        color: variables.$cor1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__label {
+        font-family: Roboto, sans-serif;
+        font-size: 14px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: variables.$cor5;
+    }
+
+    @media (max-width: 1024px) {
+        &__grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        padding: 48px 16px;
+
+        &__header {
+            margin-bottom: 36px;
+        }
+
+        &__title {
+            font-size: 32px;
+        }
+
+        &__subtitle {
+            font-size: 15px;
+        }
+
+        &__grid {
+            gap: 12px;
+        }
+
+        &__box {
+            padding: 18px 6px 14px;
+            border-radius: 18px;
+        }
+
+        &__number {
+            font-size: 32px;
+        }
+
+        &__label {
+            font-size: 11px;
+        }
+    }
+}
+
+@keyframes loveCounterFall {
+    0%   { transform: translateY(0) rotate(0deg);        opacity: 0; }
+    10%  { opacity: .8; }
+    100% { transform: translateY(var(--fall-distance, 420px)) rotate(25deg); opacity: 0; }
+}

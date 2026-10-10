@@ -130,6 +130,92 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ===============================
+// Contador desde o pedido de namoro
+// ===============================
+(function () {
+    // 05/11/2022 às 00:00 (mês começa em 0 → 10 = novembro)
+    const inicioDoNamoro = new Date(2022, 10, 5, 0, 0, 0);
+
+    const els = {
+        anos: document.getElementById("lcAnos"),
+        meses: document.getElementById("lcMeses"),
+        dias: document.getElementById("lcDias"),
+        horas: document.getElementById("lcHoras"),
+        minutos: document.getElementById("lcMinutos"),
+        segundos: document.getElementById("lcSegundos")
+    };
+
+    if (!els.anos) return;
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    // Diferença de calendário (anos, meses, dias, h, min, s)
+    function calcularTempo(inicio, agora) {
+        let anos = agora.getFullYear() - inicio.getFullYear();
+        let meses = agora.getMonth() - inicio.getMonth();
+        let dias = agora.getDate() - inicio.getDate();
+        let horas = agora.getHours() - inicio.getHours();
+        let minutos = agora.getMinutes() - inicio.getMinutes();
+        let segundos = agora.getSeconds() - inicio.getSeconds();
+
+        if (segundos < 0) { segundos += 60; minutos--; }
+        if (minutos < 0)  { minutos += 60;  horas--; }
+        if (horas < 0)    { horas += 24;    dias--; }
+        if (dias < 0) {
+            // dias do mês anterior ao atual
+            dias += new Date(agora.getFullYear(), agora.getMonth(), 0).getDate();
+            meses--;
+        }
+        if (meses < 0)    { meses += 12;    anos--; }
+
+        return { anos, meses, dias, horas, minutos, segundos };
+    }
+
+    function atualizar() {
+        const t = calcularTempo(inicioDoNamoro, new Date());
+
+        els.anos.textContent = pad(t.anos);
+        els.meses.textContent = pad(t.meses);
+        els.dias.textContent = pad(t.dias);
+        els.horas.textContent = pad(t.horas);
+        els.minutos.textContent = pad(t.minutos);
+        els.segundos.textContent = pad(t.segundos);
+    }
+
+    atualizar();
+    setInterval(atualizar, 1000);
+
+    // ---------- Corações suaves de fundo ----------
+    const secao = document.getElementById("loveCounter");
+    const heartsBox = document.getElementById("loveCounterHearts");
+    if (!secao || !heartsBox) return;
+
+    const cores = ["#ffb3c6", "#ffc2d1", "#ff9eb5", "#ffd0da", "#ff8fa8"];
+    let secaoVisivel = false;
+
+    // só cria corações enquanto a section está na tela
+    new IntersectionObserver((entries) => {
+        secaoVisivel = entries[0].isIntersecting;
+    }).observe(secao);
+
+    setInterval(() => {
+        if (!secaoVisivel) return;
+
+        const heart = document.createElement("span");
+        heart.className = "love-counter__heart";
+        heart.textContent = "♥";
+        heart.style.left = Math.random() * 100 + "%";
+        heart.style.fontSize = 12 + Math.random() * 22 + "px";
+        heart.style.color = cores[Math.floor(Math.random() * cores.length)];
+        heart.style.animationDuration = 5 + Math.random() * 4 + "s";
+        heart.style.setProperty("--fall-distance", secao.offsetHeight + 40 + "px");
+
+        heartsBox.appendChild(heart);
+        setTimeout(() => heart.remove(), 9500);
+    }, 500);
+})();
+
+// ===============================
 // GSAP + ScrollSmoother
 // ===============================
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
