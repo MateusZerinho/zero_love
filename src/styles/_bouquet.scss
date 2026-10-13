@@ -1,0 +1,37 @@
+// ./styles/_bouquet.scss
+// Mesma cor de fundo da .timeline e da .love-counter
+$fundo-timeline: #fff1f3;
+
+// ===============================
+// Buquê 3D (canvas do Three.js)
+// ===============================
+// O canvas fica FIXO e ATRÁS de todo o conteúdo (z-index negativo).
+// Ele só aparece onde a página estiver transparente: a .timeline.
+// Como os cards são brancos e opacos, o buquê passa por trás deles.
+.buque-canvas {
+    display: none; // só aparece quando o JS ativa o buquê (desktop + modelo carregado)
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    background-color: $fundo-timeline;
+}
+
+// A classe .buque-ativo é colocada no <html> pelo bouquet.js.
+// Se o buquê não carregar (celular, sem WebGL, arquivo ausente), nada disso vale
+// e a timeline continua exatamente como era.
+.buque-ativo {
+    .buque-canvas {
+        display: block;
+    }
+
+    .timeline {
+        // transparente para o canvas aparecer por trás dos cards
+        background-color: transparent;
+
+        // espaço extra no fim para o buquê encolher e sair antes da próxima section
+        padding-bottom: clamp(200px, 38vh, 360px);
+    }
+}
