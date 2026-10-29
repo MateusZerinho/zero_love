@@ -25,39 +25,50 @@
 feather.replace();
 AOS.init();
 
+// Contagem regressiva (hero)
 // ===============================
-// Contador de tempo
-// ===============================
-const dataDoEvento = new Date("Nov 5, 2026 00:00:00");
-const timeStampDoEvento = dataDoEvento.getTime();
+(function () {
+    // 05/11/2026 às 00:00 (mês começa em 0 → 10 = novembro)
+    const dataDoEvento = new Date(2026, 10, 5, 0, 0, 0).getTime();
 
-const contaAsHoras = setInterval(function () {
-    const agora = new Date().getTime();
-    const distanciaAteOEvento = timeStampDoEvento - agora;
+    const els = {
+        dias: document.getElementById("hcDias"),
+        horas: document.getElementById("hcHoras"),
+        minutos: document.getElementById("hcMinutos"),
+        segundos: document.getElementById("hcSegundos")
+    };
+    const grid = document.getElementById("heroCounter");
+    const texto = document.getElementById("heroText");
+
+    if (!els.dias) return;
+
+    const pad = (n) => String(n).padStart(2, "0");
 
     const diaEmMs = 1000 * 60 * 60 * 24;
     const horaEmMs = 1000 * 60 * 60;
     const minutoEmMs = 1000 * 60;
 
-    const dias = Math.floor(distanciaAteOEvento / diaEmMs);
-    const horas = Math.floor((distanciaAteOEvento % diaEmMs) / horaEmMs);
-    const minutos = Math.floor((distanciaAteOEvento % horaEmMs) / minutoEmMs);
-    const segundos = Math.floor((distanciaAteOEvento % minutoEmMs) / 1000);
+    let intervalo;
 
-    const contador = document.getElementById("contador");
+    function atualizar() {
+        const distancia = dataDoEvento - Date.now();
 
-    if (contador) {
-        contador.innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
-    }
-
-    if (distanciaAteOEvento < 0) {
-        clearInterval(contaAsHoras);
-        const texto = document.querySelector(".hero__text");
-        if (texto) {
-            texto.innerHTML = "O aniversário de namoro do melhor casal já acabou 💔";
+        if (distancia < 0) {
+            clearInterval(intervalo);
+            if (grid) grid.hidden = true;
+            if (texto) texto.innerHTML = "Hoje é o nosso dia 💕";
+            return;
         }
+
+        els.dias.textContent = pad(Math.floor(distancia / diaEmMs));
+        els.horas.textContent = pad(Math.floor((distancia % diaEmMs) / horaEmMs));
+        els.minutos.textContent = pad(Math.floor((distancia % horaEmMs) / minutoEmMs));
+        els.segundos.textContent = pad(Math.floor((distancia % minutoEmMs) / 1000));
     }
-}, 1000);
+
+    atualizar(); // já preenche na hora, sem esperar 1s
+    intervalo = setInterval(atualizar, 1000);
+})();
 
 // ===============================
 // Corações caindo

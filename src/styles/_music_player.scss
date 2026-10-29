@@ -1,0 +1,270 @@
+@use 'variables';
+
+$mp-bg: #0f0d10;
+$mp-border: rgba(255, 255, 255, 0.08);
+$mp-muted: rgba(255, 255, 255, 0.55);
+
+.music-player {
+    position: fixed;
+    right: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 9000; // acima do conteúdo, abaixo do preloader (99999)
+    width: 300px;
+
+    // ---------- Card ----------
+    &__card {
+        background: $mp-bg;
+        border: 1px solid $mp-border;
+        border-radius: 28px;
+        padding: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+        transform-origin: bottom right;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    &__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    &__top-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    &__eyebrow {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: $mp-muted;
+    }
+
+    &__playlist {
+        font-size: 15px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__top-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    &__status {
+        font-size: 10px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        color: $mp-muted;
+        transition: background 0.3s ease, color 0.3s ease;
+
+        &.is-playing {
+            background: rgba(247, 112, 98, 0.18);
+            color: variables.$cor2;
+        }
+    }
+
+    &__min {
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s ease;
+
+        &:hover { background: rgba(255, 255, 255, 0.18); }
+    }
+
+    // ---------- Capa (banner) ----------
+    &__cover {
+        width: 100%;
+        aspect-ratio: 16 / 7;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 18px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &__title {
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 4px;
+    }
+
+    &__artist {
+        font-size: 13px;
+        color: $mp-muted;
+        margin-bottom: 18px;
+    }
+
+    // ---------- Progresso ----------
+    &__progress {
+        padding-bottom: 16px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid $mp-border;
+    }
+
+    &__range {
+        --progress: 0%;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        border-radius: 999px;
+        outline: none;
+        cursor: pointer;
+        background: linear-gradient(
+            to right,
+            variables.$cor2 var(--progress),
+            rgba(255, 255, 255, 0.15) var(--progress)
+        );
+
+        &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            border: 0;
+            transition: transform 0.15s ease;
+        }
+        &::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border: 0;
+            border-radius: 50%;
+            background: #fff;
+        }
+        &:hover::-webkit-slider-thumb { transform: scale(1.3); }
+    }
+
+    &__times {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 11px;
+        color: $mp-muted;
+        font-variant-numeric: tabular-nums;
+
+        span { color: $mp-muted; }
+    }
+
+    // ---------- Controles ----------
+    &__controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        margin-bottom: 14px;
+    }
+
+    &__btn {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+
+        svg { color: inherit; }
+        &:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.06); }
+        &:active { transform: scale(0.95); }
+
+        &--play {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            color: #000;
+
+            &:hover { background: #fff; transform: scale(1.08); }
+
+            .icon-pause { display: none; }
+            &.is-playing {
+                .icon-play { display: none; }
+                .icon-pause { display: block; }
+            }
+        }
+    }
+
+    &__footer {
+        text-align: center;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: $mp-muted;
+    }
+
+    // ---------- Minimizado ----------
+    &__mini {
+        display: none;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        margin-left: auto;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        border-radius: 50%;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &.is-collapsed {
+        width: auto;
+
+        .music-player__card {
+            display: none;
+        }
+        .music-player__mini {
+            display: block;
+        }
+        // disco gira enquanto toca
+        &.is-playing .music-player__mini {
+            animation: mpSpin 6s linear infinite;
+        }
+    }
+
+    @media (max-width: 640px) {
+        right: 12px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        width: 264px;
+
+        &__card { padding: 16px; border-radius: 24px; }
+        &__title { font-size: 20px; }
+    }
+}
+
+@keyframes mpSpin {
+    to { transform: rotate(360deg); }
+}

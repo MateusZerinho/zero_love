@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.scss">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="icon" href="./images/zero_icone.png" type="image/png">
+    <link rel="icon" href="./assets/images/zero_icone.png" type="image/png">
 </head>
 <body>
     <!-- =============================== -->
@@ -17,7 +17,7 @@
     <!-- =============================== -->
     <div class="preloader" id="preloader">
         <div class="preloader__logo">
-            <img class="preloader__outline" src="./images/zero_love.png">
+            <img class="preloader__outline" src="./assets/images/zero_love.png">
             <div class="preloader__fill">
                 <div class="preloader__fill-bar"></div>
             </div>
@@ -35,29 +35,36 @@
                     muted
                     loop
                     playsinline
-                    poster="./images/sophia_fundo.png"
+                    poster="./assets/images/sophia_fundo.png"
                 >
-                    <source src="./images/sophia_fundo_video.mp4" type="video/mp4">
+                    <source src="./assets/videos/sophia_fundo_video.mp4" type="video/mp4">
                 </video>
                 <div class="hearts-container">
                     <!-- Corações cairão aqui dinamicamente -->
                 </div>
                 <div class="container">
-                    <img class="hero__logo" src="./images/zero_love.png" alt="logo love">
-                    <p class="hero__text">
-                        O aniversário de namoro do melhor casal começa daqui <span id="contador"></span>
+                    <img class="hero__logo" src="./assets/images/zero_love.png" alt="logo love">
+                    <p class="hero__text" id="heroText">
+                        O aniversário de namoro do melhor casal começa daqui
                     </p>
-                    <!-- wrapper mantém a barra centralizada na posição natural -->
-                    <div class="spotify-wrapper">
-                        <div class="spotify-bar" id="spotifyBar">
-                            <iframe 
-                            data-testid="embed-iframe"
-                            style="border-radius:12px"
-                            src="https://open.spotify.com/embed/playlist/7eHbLsS1ATUv95L4JgjhvO?utm_source=generator"
-                            width="100%" height="80" frameborder="0"
-                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                            loading="lazy">
-                            </iframe>
+
+                    <!-- Contagem regressiva (mesmo estilo da "Cada segundo importa") -->
+                    <div class="hero-counter" id="heroCounter">
+                        <div class="hero-counter__box">
+                            <span class="hero-counter__number" id="hcDias">00</span>
+                            <span class="hero-counter__label">Dias</span>
+                        </div>
+                        <div class="hero-counter__box">
+                            <span class="hero-counter__number" id="hcHoras">00</span>
+                            <span class="hero-counter__label">Horas</span>
+                        </div>
+                        <div class="hero-counter__box">
+                            <span class="hero-counter__number" id="hcMinutos">00</span>
+                            <span class="hero-counter__label">Minutos</span>
+                        </div>
+                        <div class="hero-counter__box">
+                            <span class="hero-counter__number" id="hcSegundos">00</span>
+                            <span class="hero-counter__label">Segundos</span>
                         </div>
                     </div>
                 </div>
@@ -71,7 +78,7 @@
                             Eu nunca fui bom com palavras ou em demonstrar sentimentos, mas estar contigo me faz querer tentar. Essa foto foi tirada em 15 de julho de 2025, voltando do aniversário da Ana. Pode parecer só uma lembrança comum... mas pra mim, é um dos nossos pequenos grandes momentos.
                         </p>
                     </div>
-                    <img class="event__image" src="./images/1.jpeg" alt="aniversario">
+                    <img class="event__image" src="./assets/images/1.jpeg" alt="aniversario">
                 </div>
             </section>
             <section class="event event--ux-ui event--image-left">
@@ -82,7 +89,7 @@
                             No dia 7 de junho de 2025, fomos ao casamento de um parente seu. Eu nem sabia direito como me vestir, mas estava feliz — só por ir ao seu lado. A gente combina em tanta coisa, até quando o dia é dos outros, ele acaba sendo especial pra mim por estar contigo.
                         </p>
                     </div>
-                    <img class="event__image" src="./images/2.jpeg" alt="casamento">
+                    <img class="event__image" src="./assets/images/2.jpeg" alt="casamento">
                 </div>
             </section>
             <section class="event event--data-science">
@@ -93,7 +100,7 @@
                             Essa foi tirada em 12 de fevereiro de 2025, depois de um dia incrível na Surfland em Garopaba. Nossa primeira "viagem" juntos e aquela sensação de que tudo está certo. Cada memória com você parece um dado importante que só o meu coração entende.
                         </p>
                     </div>
-                    <img class="event__image" src="./images/3.jpeg" alt="surfland">
+                    <img class="event__image" src="./assets/images/3.jpeg" alt="surfland">
                 </div>
             </section>
             <section class="event event--backend event--image-left">
@@ -104,7 +111,7 @@
                             Voltando do aniversário da Ana de novo, só que dessa vez foi em 19 de julho de 2024. A gente nem imaginava tudo que ainda viveria junto. Fui com o moletom que você customizou pra mim, cheio de beijos seus — como se cada um deles me abraçasse o tempo todo. Isso sempre me lembra das cartinhas também 😭
                         </p>
                     </div>
-                    <img class="event__image" src="./images/4.jpeg" alt="aniversario1">
+                    <img class="event__image" src="./assets/images/4.jpeg" alt="aniversario1">
                 </div>
             </section>
             <section class="event event--fantasia">
@@ -115,7 +122,7 @@
                             Essa foi nossa primeira foto juntos. Eu nem gosto dela (e você adora), mas ela marca o começo de tudo. E mesmo que não seja minha preferida, é especial. Porque foi o início de algo que hoje eu não trocaria por nada.
                         </p>
                     </div>
-                    <img class="event__image" src="./images/5.jpeg" alt="fantasia">
+                    <img class="event__image" src="./assets/images/5.jpeg" alt="fantasia">
                 </div>
             </section>
 
@@ -123,7 +130,7 @@
                 <h1>Anos na escola</h1>
                 <!-- Vídeo de fundo -->
                 <video class="bg-video" autoplay muted loop playsinline>
-                    <source src="./images/Hearts_Background_Loop.mp4" type="video/mp4">
+                    <source src="./assets/videos/Hearts_Background_Loop.mp4" type="video/mp4">
                     Seu navegador não suporta vídeos.
                 </video>
 
@@ -162,7 +169,7 @@
                     <li class="timeline__item" data-aos="fade-right">
                         <span class="timeline__marker">1</span>
                         <div class="timeline__card">
-                            <img class="timeline__image" src="./images/primeiro_ano.jpg" alt="Primeiro ano de namoro">
+                            <img class="timeline__image" src="./assets/images/primeiro_ano.jpg" alt="Primeiro ano de namoro">
                             <span class="timeline__date">Foto tirada no sábado, 25 de fevereiro de 2023</span>
                             <h3 class="timeline__card-title">Nosso primeiro ano</h3>
                             <p class="timeline__text">
@@ -174,7 +181,7 @@
                     <li class="timeline__item" data-aos="fade-left">
                         <span class="timeline__marker">2</span>
                         <div class="timeline__card">
-                            <img class="timeline__image" src="./images/segundo_ano.jpg" alt="Segundo ano de namoro">
+                            <img class="timeline__image" src="./assets/images/segundo_ano.jpg" alt="Segundo ano de namoro">
                             <span class="timeline__date">Foto tirada no sábado, 29 de junho de 2024</span>
                             <h3 class="timeline__card-title">Nosso segundo ano</h3>
                             <p class="timeline__text">
@@ -186,7 +193,7 @@
                     <li class="timeline__item" data-aos="fade-right">
                         <span class="timeline__marker">3</span>
                         <div class="timeline__card">
-                            <img class="timeline__image" src="./images/terceiro_ano.jpg" alt="Terceiro ano de namoro">
+                            <img class="timeline__image" src="./assets/images/terceiro_ano.jpg" alt="Terceiro ano de namoro">
                             <span class="timeline__date">Foto tirada na segunda, 27 de janeiro de 2025</span>
                             <h3 class="timeline__card-title">Nosso terceiro ano</h3>
                             <p class="timeline__text">
@@ -198,7 +205,7 @@
                     <li class="timeline__item timeline__item--current" data-aos="fade-left">
                         <span class="timeline__marker">4</span>
                         <div class="timeline__card">
-                            <img class="timeline__image" src="./images/quarto_ano.jpg" alt="Quarto ano de namoro">
+                            <img class="timeline__image" src="./assets/images/quarto_ano.jpg" alt="Quarto ano de namoro">
                             <span class="timeline__date">Foto tirada no domingo, 8 de fevereiro de 2026</span>
                             <h3 class="timeline__card-title">Nosso quarto ano</h3>
                             <p class="timeline__text">
@@ -248,16 +255,75 @@
             </section>
         </div>
     </div>
-    
+
+    <!-- =============================== -->
+    <!-- Music Player (fixo, fora do smooth-wrapper) -->
+    <!-- =============================== -->
+    <aside class="music-player" id="musicPlayer" aria-label="Player de música">
+        <audio id="mpAudio" src="./assets/audio/se_voce_quiser.mp3" loop preload="auto"></audio>
+
+        <!-- Versão minimizada (disco com a capa) -->
+        <button class="music-player__mini" id="mpMini" type="button" aria-label="Abrir player">
+            <img src="./assets/images/se_voce_quiser.jpg" alt="">
+        </button>
+
+        <!-- Card completo -->
+        <div class="music-player__card">
+            <div class="music-player__top">
+                <div class="music-player__top-text">
+                    <span class="music-player__eyebrow">Tocando agora</span>
+                    <span class="music-player__playlist">Zero Love</span>
+                </div>
+                <div class="music-player__top-actions">
+                    <span class="music-player__status" id="mpStatus">Pausado</span>
+                    <button class="music-player__min" id="mpMin" type="button" aria-label="Minimizar player">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="music-player__cover">
+                <img src="./assets/images/se_voce_quiser.jpg" alt="Capa de Se Você Quiser">
+            </div>
+
+            <h3 class="music-player__title">Se Você Quiser</h3>
+            <p class="music-player__artist">Chris MC · Prod. Fernal</p>
+
+            <div class="music-player__progress">
+                <input class="music-player__range" id="mpRange" type="range" min="0" max="100" step="0.1" value="0" aria-label="Progresso da música">
+                <div class="music-player__times">
+                    <span id="mpCurrent">0:00</span>
+                    <span id="mpDuration">0:00</span>
+                </div>
+            </div>
+
+            <div class="music-player__controls">
+                <button class="music-player__btn" id="mpPrev" type="button" aria-label="Voltar 10 segundos">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+                </button>
+
+                <button class="music-player__btn music-player__btn--play" id="mpPlay" type="button" aria-label="Tocar">
+                    <svg class="icon-play" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="icon-pause" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                </button>
+
+                <button class="music-player__btn" id="mpNext" type="button" aria-label="Avançar 10 segundos">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
+                </button>
+            </div>
+
+            <p class="music-player__footer">Em loop · Chris MC</p>
+        </div>
+    </aside>
 
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
     <!-- ScrollSmoother requires ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollSmoother.min.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="scripts/music_player.js"></script>
     <script type="module" src="scripts/bouquet.js"></script>
 </body>
 </html>

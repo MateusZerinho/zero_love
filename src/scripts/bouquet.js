@@ -21,8 +21,8 @@ const { gsap, ScrollTrigger } = window;
 // Ajustes (mexa aqui para calibrar)
 // ---------------------------------------------------------------
 const CONFIG = {
-    // Caminho do modelo (relativo a este arquivo: scripts/ → images/3d/)
-    modelo: new URL("../images/3d/bouquet.glb", import.meta.url).href,
+    // Caminho do modelo (relativo a este arquivo: scripts/ → assets/3d/)
+    modelo: new URL("../assets/3d/bouquet.glb", import.meta.url).href,
 
     // Tamanho do buquê na tela: vale o MENOR entre os três limites
     alturaMaxPx: 440,        // nunca passa disso
