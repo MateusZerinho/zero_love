@@ -1,101 +1,123 @@
 @use 'variables';
 
-$mp-bg: #0f0d10;
-$mp-border: rgba(255, 255, 255, 0.08);
-$mp-muted: rgba(255, 255, 255, 0.55);
+// ===============================================================
+// TAMANHOS: mexa aqui para ajustar o player
+// ===============================================================
+$mp-width: 264px;          // largura do card (antes: 320px)
+$mp-padding-y: 14px;       // respiro de cima/baixo (antes: 18px)
+$mp-padding-x: 16px;       // respiro dos lados (antes: 20px)
+$mp-radius: 24px;          // arredondamento do card (antes: 28px)
+
+$mp-cover-margin: 18px;    // espaço entre a capa e o título (antes: 26px)
+
+$mp-title-size: 18px;      // nome da música (antes: 22px)
+$mp-artist-size: 13px;     // nome do artista (antes: 15px)
+
+$mp-small-btn: 34px;       // botão minimizar e botão de volume (antes: 40px)
+$mp-small-icon: 20px;      // ícone dentro desses botões (antes: 22–26px)
+
+$mp-skip-btn: 40px;        // botões voltar/avançar (antes: 52px)
+$mp-skip-icon: 24px;       // ícone voltar/avançar (antes: 30px)
+$mp-play-btn: 56px;        // círculo branco do play/pause (antes: 70px)
+$mp-play-icon: 28px;       // ícone do play/pause (antes: 34px)
+
+// ===============================================================
+// Cores
+// ===============================================================
+$mp-muted: rgba(255, 255, 255, 0.6);
+$mp-track: rgba(255, 255, 255, 0.28);
+$mp-green: #1ed760;
+$mp-icon-dark: #0b0b0b;
 
 .music-player {
     position: fixed;
     right: 20px;
     bottom: max(20px, env(safe-area-inset-bottom));
     z-index: 9000; // acima do conteúdo, abaixo do preloader (99999)
-    width: 300px;
+    width: $mp-width;
 
-    // ---------- Card ----------
+    // O reset global (* { color: #fff }) deixa os <path> brancos.
+    // Aqui forçamos os ícones a herdarem a cor do botão onde estão.
+    svg,
+    svg * {
+        color: inherit;
+    }
+
+    // ---------- Card (visual Spotify) ----------
     &__card {
-        background: $mp-bg;
-        border: 1px solid $mp-border;
-        border-radius: 28px;
-        padding: 20px;
+        background: linear-gradient(180deg, #6a1a28 0%, #3b141c 55%, #1e0c10 100%);
+        border-radius: $mp-radius;
+        padding: $mp-padding-y $mp-padding-x ($mp-padding-y + 4px);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
         transform-origin: bottom right;
-        transition: transform 0.35s ease, opacity 0.35s ease;
     }
 
+    // ---------- Topo ----------
     &__top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 14px;
-    }
-
-    &__top-text {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        min-width: 0;
-    }
-
-    &__eyebrow {
-        font-size: 10px;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: $mp-muted;
-    }
-
-    &__playlist {
-        font-size: 15px;
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    &__top-actions {
-        display: flex;
+        display: grid;
+        grid-template-columns: $mp-small-btn 1fr $mp-small-btn;
         align-items: center;
-        gap: 6px;
-    }
-
-    &__status {
-        font-size: 10px;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.1);
-        color: $mp-muted;
-        transition: background 0.3s ease, color 0.3s ease;
-
-        &.is-playing {
-            background: rgba(247, 112, 98, 0.18);
-            color: variables.$cor2;
-        }
+        margin-bottom: 12px;
     }
 
     &__min {
         display: grid;
         place-items: center;
-        width: 26px;
-        height: 26px;
+        width: $mp-small-btn;
+        height: $mp-small-btn;
+        margin-left: -8px;
         border: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.08);
+        background: transparent;
         color: #fff;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: background 0.2s ease, transform 0.2s ease;
 
-        &:hover { background: rgba(255, 255, 255, 0.18); }
+        svg {
+            width: $mp-small-icon + 2px;
+            height: $mp-small-icon + 2px;
+        }
+
+        &:hover { background: rgba(255, 255, 255, 0.12); }
+        &:active { transform: scale(0.92); }
     }
 
-    // ---------- Capa (banner) ----------
+    &__top-spacer { display: block; }
+
+    &__top-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 0;
+        text-align: center;
+    }
+
+    &__eyebrow {
+        font-size: 11px;
+        color: #fff;
+        opacity: 0.9;
+        white-space: nowrap;
+    }
+
+    &__playlist {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    // ---------- Capa quadrada ----------
     &__cover {
         width: 100%;
-        aspect-ratio: 16 / 7;
-        border-radius: 14px;
+        aspect-ratio: 1 / 1;
+        border-radius: 8px;
         overflow: hidden;
-        margin-bottom: 18px;
+        margin-bottom: $mp-cover-margin;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 
         img {
             width: 100%;
@@ -105,30 +127,116 @@ $mp-muted: rgba(255, 255, 255, 0.55);
         }
     }
 
+    // ---------- Título + volume ----------
+    &__info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    &__info-text {
+        min-width: 0;
+        flex: 1;
+    }
+
     &__title {
-        font-size: 24px;
+        font-size: $mp-title-size;
         font-weight: 800;
-        line-height: 1.15;
-        margin-bottom: 4px;
+        line-height: 1.2;
+        color: #fff;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &__artist {
-        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: $mp-artist-size;
         color: $mp-muted;
-        margin-bottom: 18px;
     }
 
-    // ---------- Progresso ----------
-    &__progress {
-        padding-bottom: 16px;
-        margin-bottom: 18px;
-        border-bottom: 1px solid $mp-border;
+    &__artist-name { color: $mp-muted; }
+
+    &__explicit {
+        display: inline-grid;
+        place-items: center;
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.6);
+        color: #1a0b0e;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1;
+        flex-shrink: 0;
     }
 
+    // ---------- Botão de volume ----------
+    &__volume {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    &__vol-btn {
+        display: grid;
+        place-items: center;
+        width: $mp-small-btn;
+        height: $mp-small-btn;
+        border: 0;
+        border-radius: 50%;
+        background: $mp-green;
+        color: $mp-icon-dark; // ícone escuro sobre o verde
+        cursor: pointer;
+        transition: transform 0.2s ease, filter 0.2s ease;
+
+        svg {
+            display: none;
+            width: $mp-small-icon - 2px;
+            height: $mp-small-icon - 2px;
+        }
+        &:hover { transform: scale(1.06); filter: brightness(1.08); }
+        &:active { transform: scale(0.94); }
+
+        &[data-level="mute"] .vol-icon--mute { display: block; }
+        &[data-level="low"]  .vol-icon--low  { display: block; }
+        &[data-level="high"] .vol-icon--high { display: block; }
+    }
+
+    // Barrinha que aparece acima do botão
+    &__volume-pop {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 10px);
+        width: 150px;
+        padding: 12px 14px;
+        border-radius: 999px;
+        background: rgba(18, 8, 11, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(6px) scale(0.96);
+        transform-origin: bottom right;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    }
+
+    &__volume.is-open &__volume-pop {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+    }
+
+    // ---------- Slider (progresso e volume) ----------
     &__range {
         --progress: 0%;
         -webkit-appearance: none;
         appearance: none;
+        display: block;
         width: 100%;
         height: 4px;
         border-radius: 999px;
@@ -136,34 +244,48 @@ $mp-muted: rgba(255, 255, 255, 0.55);
         cursor: pointer;
         background: linear-gradient(
             to right,
-            variables.$cor2 var(--progress),
-            rgba(255, 255, 255, 0.15) var(--progress)
+            #fff var(--progress),
+            $mp-track var(--progress)
         );
 
         &::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
             background: #fff;
             border: 0;
             transition: transform 0.15s ease;
         }
         &::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
+            width: 11px;
+            height: 11px;
             border: 0;
             border-radius: 50%;
             background: #fff;
         }
-        &:hover::-webkit-slider-thumb { transform: scale(1.3); }
+        &:hover::-webkit-slider-thumb { transform: scale(1.25); }
+
+        // o volume usa a cor verde
+        &--volume {
+            background: linear-gradient(
+                to right,
+                $mp-green var(--progress),
+                $mp-track var(--progress)
+            );
+        }
+    }
+
+    // ---------- Progresso ----------
+    &__progress {
+        margin-bottom: 12px;
     }
 
     &__times {
         display: flex;
         justify-content: space-between;
         margin-top: 8px;
-        font-size: 11px;
+        font-size: 12px;
         color: $mp-muted;
         font-variant-numeric: tabular-nums;
 
@@ -174,34 +296,42 @@ $mp-muted: rgba(255, 255, 255, 0.55);
     &__controls {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 22px;
-        margin-bottom: 14px;
+        justify-content: space-between;
+        padding: 0 16px;
     }
 
     &__btn {
         display: grid;
         place-items: center;
-        width: 46px;
-        height: 46px;
+        width: $mp-skip-btn;
+        height: $mp-skip-btn;
         border: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
+        background: transparent;
         color: #fff;
         cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
+        transition: transform 0.2s ease, opacity 0.2s ease;
 
-        svg { color: inherit; }
-        &:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.06); }
-        &:active { transform: scale(0.95); }
+        svg {
+            width: $mp-skip-icon;
+            height: $mp-skip-icon;
+        }
+
+        &:hover { transform: scale(1.08); }
+        &:active { transform: scale(0.92); }
 
         &--play {
-            width: 60px;
-            height: 60px;
+            width: $mp-play-btn;
+            height: $mp-play-btn;
             background: #fff;
-            color: #000;
+            color: $mp-icon-dark; // play/pause preto sobre o círculo branco
 
-            &:hover { background: #fff; transform: scale(1.08); }
+            svg {
+                width: $mp-play-icon;
+                height: $mp-play-icon;
+            }
+
+            &:hover { background: #fff; transform: scale(1.06); }
 
             .icon-pause { display: none; }
             &.is-playing {
@@ -211,19 +341,11 @@ $mp-muted: rgba(255, 255, 255, 0.55);
         }
     }
 
-    &__footer {
-        text-align: center;
-        font-size: 10px;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: $mp-muted;
-    }
-
     // ---------- Minimizado ----------
     &__mini {
         display: none;
-        width: 56px;
-        height: 56px;
+        width: 52px;
+        height: 52px;
         padding: 0;
         margin-left: auto;
         border: 2px solid rgba(255, 255, 255, 0.85);
@@ -255,13 +377,26 @@ $mp-muted: rgba(255, 255, 255, 0.55);
         }
     }
 
+    // Celular
     @media (max-width: 640px) {
         right: 12px;
         bottom: max(12px, env(safe-area-inset-bottom));
-        width: 264px;
+        width: 236px;
 
-        &__card { padding: 16px; border-radius: 24px; }
-        &__title { font-size: 20px; }
+        &__card { padding: 12px 14px 16px; border-radius: 22px; }
+        &__cover { margin-bottom: 14px; }
+        &__title { font-size: 16px; }
+        &__btn--play { width: 52px; height: 52px; }
+    }
+
+    // Telas baixas: limita a capa para o card não estourar a janela
+    @media (max-height: 760px) {
+        &__cover {
+            width: 72%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 14px;
+        }
     }
 }
 

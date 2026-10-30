@@ -270,24 +270,48 @@
         <!-- Card completo -->
         <div class="music-player__card">
             <div class="music-player__top">
+                <button class="music-player__min" id="mpMin" type="button" aria-label="Minimizar player">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>
+                </button>
+
                 <div class="music-player__top-text">
-                    <span class="music-player__eyebrow">Tocando agora</span>
-                    <span class="music-player__playlist">Zero Love</span>
+                    <span class="music-player__eyebrow">Tocando da playlist</span>
+                    <span class="music-player__playlist">zero love</span>
                 </div>
-                <div class="music-player__top-actions">
-                    <span class="music-player__status" id="mpStatus">Pausado</span>
-                    <button class="music-player__min" id="mpMin" type="button" aria-label="Minimizar player">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg>
-                    </button>
-                </div>
+
+                <!-- espaçador para manter o texto centralizado -->
+                <span class="music-player__top-spacer" aria-hidden="true"></span>
             </div>
 
             <div class="music-player__cover">
                 <img src="./assets/images/se_voce_quiser.jpg" alt="Capa de Se Você Quiser">
             </div>
 
-            <h3 class="music-player__title">Se Você Quiser</h3>
-            <p class="music-player__artist">Chris MC · Prod. Fernal</p>
+            <div class="music-player__info">
+                <div class="music-player__info-text">
+                    <h3 class="music-player__title">Se Você Quiser</h3>
+                    <p class="music-player__artist">
+                        <span class="music-player__explicit" title="Conteúdo explícito">E</span>
+                        <span class="music-player__artist-name">Chris MC</span>
+                    </p>
+                </div>
+
+                <!-- Botão de volume + barrinha -->
+                <div class="music-player__volume" id="mpVolume">
+                    <div class="music-player__volume-pop" id="mpVolumePop">
+                        <input class="music-player__range music-player__range--volume" id="mpVolumeRange" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume">
+                    </div>
+
+                    <button class="music-player__vol-btn" id="mpVolumeBtn" type="button" aria-label="Ajustar volume" aria-expanded="false" data-level="high">
+                        <!-- mudo -->
+                        <svg class="vol-icon vol-icon--mute" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                        <!-- baixo -->
+                        <svg class="vol-icon vol-icon--low" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M15.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                        <!-- alto -->
+                        <svg class="vol-icon vol-icon--high" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                    </button>
+                </div>
+            </div>
 
             <div class="music-player__progress">
                 <input class="music-player__range" id="mpRange" type="range" min="0" max="100" step="0.1" value="0" aria-label="Progresso da música">
@@ -299,20 +323,18 @@
 
             <div class="music-player__controls">
                 <button class="music-player__btn" id="mpPrev" type="button" aria-label="Voltar 10 segundos">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M6 5h2.4v14H6zM20 5v14L9 12z"/></svg>
                 </button>
 
                 <button class="music-player__btn music-player__btn--play" id="mpPlay" type="button" aria-label="Tocar">
-                    <svg class="icon-play" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="icon-pause" viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                    <svg class="icon-play" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="icon-pause" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
                 </button>
 
                 <button class="music-player__btn" id="mpNext" type="button" aria-label="Avançar 10 segundos">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5v14l11-7z"/></svg>
                 </button>
             </div>
-
-            <p class="music-player__footer">Em loop · Chris MC</p>
         </div>
     </aside>
 

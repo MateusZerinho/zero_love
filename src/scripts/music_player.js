@@ -1,5 +1,5 @@
 // ===============================
-// Music Player (loop + UI)
+// Music Player (loop + UI estilo Spotify)
 // ===============================
 (function () {
     const player = document.getElementById("musicPlayer");
@@ -12,12 +12,17 @@
     const btnMin = document.getElementById("mpMin");
     const btnMini = document.getElementById("mpMini");
     const range = document.getElementById("mpRange");
-    const status = document.getElementById("mpStatus");
     const elCurrent = document.getElementById("mpCurrent");
     const elDuration = document.getElementById("mpDuration");
 
+    // Volume
+    const volBox = document.getElementById("mpVolume");
+    const volBtn = document.getElementById("mpVolumeBtn");
+    const volRange = document.getElementById("mpVolumeRange");
+
     const SALTO = 10; // segundos para os botões anterior/próximo
-    audio.volume = 0.6;
+    const VOLUME_INICIAL = 0.6;
+    audio.volume = VOLUME_INICIAL;
     audio.loop = true;
 
     const formatar = (s) => {
@@ -27,9 +32,9 @@
         return `${m}:${String(seg).padStart(2, "0")}`;
     };
 
-    const pintarBarra = () => {
-        const max = Number(range.max) || 1;
-        range.style.setProperty("--progress", (range.value / max) * 100 + "%");
+    const pintar = (input) => {
+        const max = Number(input.max) || 1;
+        input.style.setProperty("--progress", (input.value / max) * 100 + "%");
     };
 
     // ---------- Estado visual ----------
@@ -38,8 +43,6 @@
         btnPlay.classList.toggle("is-playing", tocando);
         btnPlay.setAttribute("aria-label", tocando ? "Pausar" : "Tocar");
         player.classList.toggle("is-playing", tocando);
-        status.classList.toggle("is-playing", tocando);
-        status.textContent = tocando ? "Tocando" : "Pausado";
     }
 
     audio.addEventListener("play", atualizarEstado);
@@ -54,7 +57,7 @@
     audio.addEventListener("timeupdate", () => {
         if (!range.matches(":active")) {
             range.value = audio.currentTime;
-            pintarBarra();
+            pintar(range);
         }
         elCurrent.textContent = formatar(audio.currentTime);
     });
@@ -62,7 +65,7 @@
     range.addEventListener("input", () => {
         audio.currentTime = Number(range.value);
         elCurrent.textContent = formatar(audio.currentTime);
-        pintarBarra();
+        pintar(range);
     });
 
     // ---------- Botões ----------
@@ -81,7 +84,11 @@
         audio.currentTime = alvo >= audio.duration ? 0 : alvo;
     });
 
-    btnMin.addEventListener("click", () => player.classList.add("is-collapsed"));
+    // ---------- Minimizar / abrir ----------
+    btnMin.addEventListener("click", () => {
+        fecharVolume();
+        player.classList.add("is-collapsed");
+    });
     btnMini.addEventListener("click", () => player.classList.remove("is-collapsed"));
 
     // No celular começa minimizado para não cobrir o conteúdo
@@ -89,13 +96,54 @@
         player.classList.add("is-collapsed");
     }
 
+    // ---------- Volume ----------
+    function atualizarIconeVolume() {
+        const v = audio.volume;
+        const nivel = v === 0 ? "mute" : v < 0.5 ? "low" : "high";
+        volBtn.dataset.level = nivel;
+    }
+
+    function abrirVolume() {
+        volBox.classList.add("is-open");
+        volBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function fecharVolume() {
+        volBox.classList.remove("is-open");
+        volBtn.setAttribute("aria-expanded", "false");
+    }
+
+    volBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (volBox.classList.contains("is-open")) fecharVolume();
+        else abrirVolume();
+    });
+
+    volRange.addEventListener("input", () => {
+        audio.volume = Number(volRange.value);
+        pintar(volRange);
+        atualizarIconeVolume();
+    });
+
+    // Fecha ao clicar fora da barrinha ou apertar Esc
+    document.addEventListener("pointerdown", (e) => {
+        if (!volBox.contains(e.target)) fecharVolume();
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") fecharVolume();
+    });
+
+    volRange.value = VOLUME_INICIAL;
+    pintar(volRange);
+    atualizarIconeVolume();
+
     // ---------- Autoplay ----------
     // Navegadores bloqueiam áudio automático. Tentamos tocar e, se for
     // bloqueado, começamos na primeira interação do usuário com a página.
     const eventos = ["pointerdown", "keydown", "touchend"];
 
     function iniciarNaInteracao(e) {
-        // se o clique foi no botão de pausar do player, não força o play
+        // se o clique foi dentro do player (pausar, volume...), não força o play
         if (e.target.closest && e.target.closest("#musicPlayer")) {
             eventos.forEach((ev) => document.removeEventListener(ev, iniciarNaInteracao));
             return;
@@ -110,5 +158,5 @@
     });
 
     atualizarEstado();
-    pintarBarra();
+    pintar(range);
 })();
