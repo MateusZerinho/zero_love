@@ -13,8 +13,9 @@
 //     card e o card aparece em 1:1 (texto nítido) quando está de frente.
 //  4. Arrastar em qualquer lugar do card gira a placa. Botões, barra de
 //     progresso e links continuam funcionando normalmente.
-//  5. Só liga no desktop (> 640px) e com WebGL. No celular (ou sem WebGL) o
-//     player volta a ser o card fixo de sempre.
+//  5. Liga no desktop E no celular (ligarNoCelular: true), desde que haja WebGL.
+//     Sem WebGL o player volta a ser o card fixo de sempre.
+//     No celular o toque funciona como o mouse: arrastar sobre o card gira a placa.
 // ===============================================================
 
 import * as THREE from "three";
@@ -38,6 +39,10 @@ const CONFIG = {
     // Quando ligar
     mediaQueryDesktop: "(min-width: 641px)",
     mediaQueryCelular: "(max-width: 640px)",
+
+    // true = a placa de vidro também aparece no celular.
+    // false = no celular volta a ser o card fixo normal (como antes).
+    ligarNoCelular: true,
 
     // Forma da placa (px). A face da placa fica colada no card.
     moldura: 6,    // vidro que aparece ao redor do card
@@ -79,6 +84,7 @@ const CONFIG = {
     luz: 1,                // brilho do ambiente
     exposicao: 1,
     pixelRatioMax: 2,
+    pixelRatioMaxCelular: 1.5, // vidro com transmissão é pesado: no celular rende menos pixels
 };
 
 // Elementos que NÃO devem iniciar o arrasto (continuam clicáveis)
@@ -274,6 +280,13 @@ let calmaAlvo = 0;
 let ultimoMs = 0;
 let minimizadoAntes = null;
 
+// Qualidade de renderização: menor no celular (economiza GPU e bateria)
+function pixelRatioAtual() {
+    const celular = window.matchMedia(CONFIG.mediaQueryCelular).matches;
+    const max = celular ? CONFIG.pixelRatioMaxCelular : CONFIG.pixelRatioMax;
+    return Math.min(window.devicePixelRatio || 1, max);
+}
+
 // ---------------------------------------------------------------
 // Montagem (acontece uma vez)
 // ---------------------------------------------------------------
@@ -305,7 +318,7 @@ function montar() {
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = CONFIG.exposicao;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.pixelRatioMax));
+    renderer.setPixelRatio(pixelRatioAtual());
 
     cssRenderer = new CSS3DRenderer({ element: camadaHtml });
 
@@ -388,6 +401,8 @@ function medir() {
     if (!w || !h) return;
 
     const { moldura, espessura, chanfro, sala, salaMinima, fov } = CONFIG;
+
+    renderer.setPixelRatio(pixelRatioAtual());
 
     // Placa
     placa.geometry.dispose();
@@ -532,7 +547,7 @@ function iniciar() {
 
     const sincronizar = () => {
         try {
-            if (desktop.matches) habilitar();
+            if (desktop.matches || CONFIG.ligarNoCelular) habilitar();
             else desabilitar();
         } catch (erro) {
             // Sem WebGL ou algo deu errado: o player continua como card fixo normal

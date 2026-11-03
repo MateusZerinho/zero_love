@@ -52,8 +52,11 @@
         pointer-events: none; // só o card (e a caixa) recebem mouse
     }
 
+    // Celular: a placa fica colada no canto, na mesma posição do player original (12px).
+    // (Para voltar ao card normal no celular: ligarNoCelular: false no glass_player.js
+    //  e troque a linha abaixo por  display: none;)
     @media (max-width: 640px) {
-        display: none; // no celular o player volta a ser o card fixo normal
+        --glass-margin: 12px;
     }
 }
 
