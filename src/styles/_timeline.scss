@@ -1,5 +1,25 @@
 @use 'variables';
 
+// ===============================
+// Coração (máscara) usado nos marcadores e no coração viajante
+// ===============================
+$tl-coracao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+
+@mixin tl-coracao($fundo) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: $fundo;
+    -webkit-mask-image: $tl-coracao;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-image: $tl-coracao;
+    mask-position: center;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+}
+
 .timeline {
     background-color: #fff1f3;
     padding: 80px 0;
@@ -32,7 +52,7 @@
         margin: 0 auto;
         padding: 0 20px;
 
-        // linha central
+        // linha central ANTIGA (continua valendo se o JS do vetor não carregar)
         &::before {
             content: '';
             position: absolute;
@@ -47,18 +67,20 @@
         }
     }
 
+    // ATENÇÃO: o timeline_path.js coloca o SVG, o coração e as faíscas DENTRO do <ol>.
+    // Por isso aqui é :nth-of-type / :last-of-type (só contam <li>) e não :nth-child.
     &__item {
         position: relative;
         width: 50%;
         padding-right: 56px;
         margin-bottom: 56px;
 
-        &:last-child {
+        &:last-of-type {
             margin-bottom: 0;
         }
 
         // itens pares ficam do lado direito
-        &:nth-child(even) {
+        &:nth-of-type(even) {
             margin-left: 50%;
             padding-right: 0;
             padding-left: 56px;
@@ -136,11 +158,143 @@
         color: variables.$cor5;
     }
 
-    // último item: ano em andamento
+    // último item: ano em andamento (visual antigo, usado só sem o vetor)
     &__item--current &__marker {
         background-color: variables.$cor1;
         color: #fff;
         animation: timelinePulse 2s ease-in-out infinite;
+    }
+
+    // ===============================================================
+    // VETOR ANIMADO (ativado pelo timeline_path.js: classe .timeline--vetor)
+    // ===============================================================
+
+    // some a linha reta antiga
+    &--vetor &__list::before {
+        display: none;
+    }
+
+    // --- Caminho (SVG) ---------------------------------------------
+    &__path {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    &__stop--ini { stop-color: variables.$cor2; }
+    &__stop--fim { stop-color: variables.$cor1; }
+
+    // trilho: o caminho que ainda vai ser percorrido (pontinhos)
+    &__path-trilho {
+        fill: none;
+        stroke: #f2b4bf;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 0.1 11;
+    }
+
+    // rastro: o que o coração já percorreu
+    &__path-rastro {
+        fill: none;
+        stroke: url(#timelineGradiente);
+        stroke-width: 5;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 5px rgba(247, 112, 98, .55));
+    }
+
+    // --- Marcadores viram corações "carimbados" ---------------------
+    // (vem DEPOIS da regra do item atual para vencer a briga de especificidade)
+    &--vetor &__marker {
+        width: 48px;
+        height: 48px;
+        border: 0;
+        border-radius: 0;
+        background: none;
+        box-shadow: none;
+        animation: none;
+        font-size: 15px;
+        color: #df8797;
+        filter: drop-shadow(0 4px 8px rgba(195, 20, 50, .18));
+        transition: color .3s ease;
+
+        // o coração em si (atrás do número)
+        &::before {
+            @include tl-coracao(#ffdfe4);
+            z-index: -1;
+        }
+
+        // coração já alcançado pelo rastro
+        &.is-reached {
+            color: #fff;
+            animation: timelineCarimbo .6s cubic-bezier(.34, 1.56, .64, 1);
+
+            &::before {
+                background: linear-gradient(145deg, variables.$cor2, variables.$cor1);
+            }
+        }
+    }
+
+    // --- Coração viajante -------------------------------------------
+    // O JS só move o &__traveler (translate). A inclinação e a batida ficam no corpo.
+    &__traveler {
+        --tamanho: 60px;
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--tamanho);
+        height: var(--tamanho);
+        margin: calc(var(--tamanho) / -2) 0 0 calc(var(--tamanho) / -2);
+        z-index: 3;
+        pointer-events: none;
+        will-change: transform;
+        opacity: 0; // só aparece depois da primeira medição (evita piscar no canto)
+
+        &--pronto {
+            opacity: 1;
+        }
+    }
+
+    &__traveler-body {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 8px 14px rgba(195, 20, 50, .45));
+        animation: timelineBatida 1.3s ease-in-out infinite;
+
+        &::before {
+            @include tl-coracao(radial-gradient(circle at 32% 26%, #ff8fa3 0%, variables.$cor1 62%));
+        }
+    }
+
+    &__traveler-num {
+        position: relative;
+        margin-top: -2px;
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+        color: #fff;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // --- Faíscas (corações pequenos que o viajante deixa para trás) ---
+    &__spark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+        animation: timelineFaisca 1.5s ease-out forwards;
     }
 
     @media (max-width: 640px) {
@@ -159,7 +313,7 @@
         }
 
         &__item,
-        &__item:nth-child(even) {
+        &__item:nth-of-type(even) {
             width: 100%;
             margin-left: 0;
             padding-left: 76px;
@@ -168,14 +322,36 @@
         }
 
         &__marker,
-        &__item:nth-child(even) &__marker {
+        &__item:nth-of-type(even) &__marker {
             left: 20px;
             right: auto;
         }
 
         &__card,
-        &__item:nth-child(even) &__card {
+        &__item:nth-of-type(even) &__card {
             text-align: left;
+        }
+
+        &__traveler {
+            --tamanho: 48px;
+        }
+
+        &__traveler-num {
+            font-size: 18px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__traveler-body {
+            animation: none;
+        }
+
+        &__spark {
+            display: none;
+        }
+
+        &--vetor &__marker.is-reached {
+            animation: none;
         }
     }
 }
@@ -183,4 +359,32 @@
 @keyframes timelinePulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(195, 20, 50, .45); }
     50%      { box-shadow: 0 0 0 12px rgba(195, 20, 50, 0); }
+}
+
+// batida dupla, como um coração de verdade
+@keyframes timelineBatida {
+    0%, 70%, 100% { transform: scale(1); }
+    14%           { transform: scale(1.13); }
+    28%           { transform: scale(1); }
+    42%           { transform: scale(1.07); }
+}
+
+// o marcador "estampa" quando o coração passa por ele
+@keyframes timelineCarimbo {
+    0%   { transform: scale(.55); }
+    100% { transform: scale(1); }
+}
+
+@keyframes timelineFaisca {
+    0% {
+        opacity: 0;
+        transform: translate(calc(var(--x) - 50%), calc(var(--y) - 50%)) scale(.4) rotate(0deg);
+    }
+    15% {
+        opacity: .9;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(var(--x) + var(--dx) - 50%), calc(var(--y) + var(--dy) - 50%)) scale(1) rotate(var(--rot));
+    }
 }

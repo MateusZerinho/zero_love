@@ -164,6 +164,10 @@
         gap: 0;
         transition: transform .3s ease, box-shadow .3s ease, background-color .3s ease;
 
+        // O GSAP anima esta variável (--pulo). Uso `translate` (e não `transform`)
+        // para não brigar com o hover, que usa `transform`, nem com a transition.
+        translate: 0 var(--pulo, 0px);
+
         &:hover {
             transform: translateY(-4px);
             background-color: rgba(255, 255, 255, 0.2);

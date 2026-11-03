@@ -1,37 +1,40 @@
 // ./styles/_bouquet.scss
-// Mesma cor de fundo da .timeline e da .love-counter
-$fundo-timeline: #fff1f3;
-
 // ===============================
-// Buquê 3D (canvas do Three.js)
+// Buquê 3D (canvas do Three.js) na última section
 // ===============================
-// O canvas fica FIXO e ATRÁS de todo o conteúdo (z-index negativo).
-// Ele só aparece onde a página estiver transparente: a .timeline.
-// Como os cards são brancos e opacos, o buquê passa por trás deles.
+// O bouquet.js move o <canvas id="bouquetCanvas"> para dentro da .love-counter
+// (que já é position: relative). Aqui só definimos ONDE ele fica e o TAMANHO dele.
+// O buquê gira no centro desse canvas e ocupa ~92% do lado menor (veja "preenchimento" no JS).
+//
+// A classe .buque-ativo é colocada no <html> pelo bouquet.js (desktop + modelo carregado).
+// Se o buquê não carregar (celular, sem WebGL, arquivo ausente), nada disso vale
+// e a section continua exatamente como era.
 .buque-canvas {
-    display: none; // só aparece quando o JS ativa o buquê (desktop + modelo carregado)
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    background-color: $fundo-timeline;
+    display: none;
+    opacity: 0;               // aparece com fade quando o JS adiciona .buque-pronto
+    transition: opacity .8s ease;
+    pointer-events: none;     // não bloqueia clique em nada
 }
 
-// A classe .buque-ativo é colocada no <html> pelo bouquet.js.
-// Se o buquê não carregar (celular, sem WebGL, arquivo ausente), nada disso vale
-// e a timeline continua exatamente como era.
-.buque-ativo {
-    .buque-canvas {
-        display: block;
-    }
+.buque-ativo .buque-canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;             // acompanha a altura da section
 
-    .timeline {
-        // transparente para o canvas aparecer por trás dos cards
-        background-color: transparent;
+    // Largura: a faixa livre à esquerda do grid de contadores (que tem 900px e fica
+    // centralizado) + 140px que podem entrar por baixo dele. Nunca passa de 34vw.
+    // Quer o buquê maior/menor? Mexa nos 140px ou no 34vw.
+    width: min(34vw, max(220px, calc((100% - 900px) / 2 + 140px)));
 
-        // espaço extra no fim para o buquê encolher e sair antes da próxima section
-        padding-bottom: clamp(200px, 38vh, 360px);
+    // z-index 2: fica NA FRENTE do título e dos contadores (que usam z-index 1),
+    // como o martelo da referência. Como o canvas é transparente e tem
+    // pointer-events: none, só o buquê em si cobre o que estiver atrás.
+    // Quer ele ATRÁS dos textos? Troque para z-index: 0.
+    z-index: 2;
+
+    &.buque-pronto {
+        opacity: 1;
     }
 }

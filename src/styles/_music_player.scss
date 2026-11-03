@@ -1,5 +1,8 @@
 @use 'variables';
 
+// ---------- Vinil minimizado ----------
+$mp-mini: 68px; // diâmetro do disco (a placa de vidro acompanha)
+
 // ===============================================================
 // TAMANHOS: mexa aqui para ajustar o player
 // ===============================================================
@@ -21,12 +24,17 @@ $mp-skip-icon: 24px;       // ícone voltar/avançar (antes: 30px)
 $mp-play-btn: 56px;        // círculo branco do play/pause (antes: 70px)
 $mp-play-icon: 28px;       // ícone do play/pause (antes: 34px)
 
+$mp-thumb: 16px; // tamanho do coração (a bolinha era 11px)
+
+// Coração branco (mesmo desenho usado na timeline)
+$mp-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+
 // ===============================================================
 // Cores
 // ===============================================================
 $mp-muted: rgba(255, 255, 255, 0.6);
 $mp-track: rgba(255, 255, 255, 0.28);
-$mp-green: #1ed760;
+$mp-green: variables.$cor2;   // era #1ed760
 $mp-icon-dark: #0b0b0b;
 
 .music-player {
@@ -101,17 +109,19 @@ $mp-icon-dark: #0b0b0b;
     }
 
     &__playlist {
-        font-size: 13px;
-        font-weight: 700;
+        font-family: "Pacifico", cursive;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 1;      // dá altura para os laços da Pacifico
+        padding: 2px 0 6px;    // folga extra embaixo
         color: #fff;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
+        overflow: visible;     // era hidden: era isso que cortava
     }
 
     // ---------- Capa quadrada ----------
     &__cover {
+        position: relative; // ← novo: o canvas fica por cima da imagem
         width: 100%;
         aspect-ratio: 1 / 1;
         border-radius: 8px;
@@ -125,6 +135,21 @@ $mp-icon-dark: #0b0b0b;
             object-fit: cover;
             display: block;
         }
+    }
+
+    // ---------- Chuva na capa (droplets_cover.js) ----------
+    &__cover-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        opacity: 0;                    // só aparece quando o WebGL subiu com sucesso
+        transition: opacity .6s ease;
+    }
+
+    &__cover--chuva &__cover-canvas {
+        opacity: 1;
     }
 
     // ---------- Título + volume ----------
@@ -250,21 +275,24 @@ $mp-icon-dark: #0b0b0b;
 
         &::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            background: #fff;
+            width: $mp-thumb;
+            height: $mp-thumb;
             border: 0;
+            border-radius: 0;
+            background: $mp-heart center / contain no-repeat;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
             transition: transform 0.15s ease;
         }
         &::-moz-range-thumb {
-            width: 11px;
-            height: 11px;
+            width: $mp-thumb;
+            height: $mp-thumb;
             border: 0;
-            border-radius: 50%;
-            background: #fff;
+            border-radius: 0;
+            background: $mp-heart center / contain no-repeat;
+            transition: transform 0.15s ease;
         }
         &:hover::-webkit-slider-thumb { transform: scale(1.25); }
+        &:hover::-moz-range-thumb { transform: scale(1.25); }
 
         // o volume usa a cor verde
         &--volume {
@@ -341,40 +369,94 @@ $mp-icon-dark: #0b0b0b;
         }
     }
 
-    // ---------- Minimizado ----------
+    // ---------- Minimizado: vinil + agulha ----------
+    // ---------- Minimizado: só o vinil ----------
     &__mini {
         display: none;
-        width: 52px;
-        height: 52px;
+        position: relative;
+        width: $mp-mini;
+        height: $mp-mini;
         padding: 0;
         margin-left: auto;
-        border: 2px solid rgba(255, 255, 255, 0.85);
-        border-radius: 50%;
-        overflow: hidden;
+        border: 0;
+        border-radius: 50%; // o glass_player.js lê este raio: a placa continua redonda
+        background: none;
         cursor: pointer;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+        // Reflexo de luz: fica PARADO enquanto o disco gira (dois brilhos opostos, como na referência)
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 20deg,
+                rgba(255, 255, 255, 0) 0deg,
+                rgba(255, 255, 255, 0.2) 25deg,
+                rgba(255, 255, 255, 0) 60deg,
+                rgba(255, 255, 255, 0) 180deg,
+                rgba(255, 255, 255, 0.14) 205deg,
+                rgba(255, 255, 255, 0) 240deg
+            );
+            // não passa por cima do rótulo (a capa)
+            -webkit-mask: radial-gradient(circle closest-side, transparent 50%, #000 52%);
+            mask: radial-gradient(circle closest-side, transparent 50%, #000 52%);
+            pointer-events: none;
+            z-index: 1;
         }
+    }
+
+    // O disco (é ele que gira)
+    &__disc {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background:
+            // alguns sulcos mais marcados, como na referência
+            radial-gradient(
+                circle closest-side,
+                transparent 0 56%,
+                rgba(0, 0, 0, 0.9) 56% 57%,
+                transparent 57% 65%,
+                rgba(0, 0, 0, 0.9) 65% 66%,
+                transparent 66% 74%,
+                rgba(0, 0, 0, 0.9) 74% 75%,
+                transparent 75% 83%,
+                rgba(0, 0, 0, 0.9) 83% 84%,
+                transparent 84% 91%,
+                rgba(0, 0, 0, 0.9) 91% 92%,
+                transparent 92%
+            ),
+            // textura fina do vinil
+            repeating-radial-gradient(circle, #151518 0 1px, #0e0e11 1px 2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    // Rótulo = capa da música (um pouco mais da metade do disco, como na imagem)
+    &__disc-label {
+        position: absolute;
+        left: 24%;
+        top: 24%;
+        width: 52%;
+        height: 52%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        box-shadow: 0 0 0 1.5px #050507; // aro escuro entre o rótulo e o vinil
     }
 
     &.is-collapsed {
         width: auto;
 
-        .music-player__card {
-            display: none;
+        .music-player__card { display: none; }
+        .music-player__mini { display: block; }
+
+        // gira enquanto toca e PARA no lugar ao pausar
+        .music-player__disc {
+            animation: mpSpin 3s linear infinite;
+            animation-play-state: paused;
         }
-        .music-player__mini {
-            display: block;
-        }
-        // disco gira enquanto toca
-        &.is-playing .music-player__mini {
-            animation: mpSpin 6s linear infinite;
-        }
+        &.is-playing .music-player__disc { animation-play-state: running; }
     }
 
     // Celular
@@ -390,13 +472,8 @@ $mp-icon-dark: #0b0b0b;
     }
 
     // Telas baixas: limita a capa para o card não estourar a janela
-    @media (max-height: 760px) {
-        &__cover {
-            width: 72%;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 14px;
-        }
+    @media (prefers-reduced-motion: reduce) {
+        &.is-collapsed .music-player__disc { animation: none; }
     }
 }
 

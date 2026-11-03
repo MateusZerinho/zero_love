@@ -36,6 +36,9 @@
                     loop
                     playsinline
                     poster="./assets/images/sophia_fundo.png"
+                    disablepictureinpicture
+                    disableremoteplayback
+                    controlslist="nodownload noplaybackrate noremoteplayback"
                 >
                     <source src="./assets/videos/sophia_fundo_video.mp4" type="video/mp4">
                 </video>
@@ -129,7 +132,7 @@
             <section class="sectionPai">
                 <h1>Anos na escola</h1>
                 <!-- Vídeo de fundo -->
-                <video class="bg-video" autoplay muted loop playsinline>
+                <video class="bg-video" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback">
                     <source src="./assets/videos/Hearts_Background_Loop.mp4" type="video/mp4">
                     Seu navegador não suporta vídeos.
                 </video>
@@ -166,9 +169,9 @@
                 </div>
 
                 <ol class="timeline__list">
-                    <li class="timeline__item" data-aos="fade-right">
+                    <li class="timeline__item">
                         <span class="timeline__marker">1</span>
-                        <div class="timeline__card">
+                        <div class="timeline__card" data-aos="fade-right">
                             <img class="timeline__image" src="./assets/images/primeiro_ano.jpg" alt="Primeiro ano de namoro">
                             <span class="timeline__date">Foto tirada no sábado, 25 de fevereiro de 2023</span>
                             <h3 class="timeline__card-title">Nosso primeiro ano</h3>
@@ -178,9 +181,9 @@
                         </div>
                     </li>
 
-                    <li class="timeline__item" data-aos="fade-left">
+                    <li class="timeline__item">
                         <span class="timeline__marker">2</span>
-                        <div class="timeline__card">
+                        <div class="timeline__card" data-aos="fade-left">
                             <img class="timeline__image" src="./assets/images/segundo_ano.jpg" alt="Segundo ano de namoro">
                             <span class="timeline__date">Foto tirada no sábado, 29 de junho de 2024</span>
                             <h3 class="timeline__card-title">Nosso segundo ano</h3>
@@ -190,9 +193,9 @@
                         </div>
                     </li>
 
-                    <li class="timeline__item" data-aos="fade-right">
+                    <li class="timeline__item">
                         <span class="timeline__marker">3</span>
-                        <div class="timeline__card">
+                        <div class="timeline__card" data-aos="fade-right">
                             <img class="timeline__image" src="./assets/images/terceiro_ano.jpg" alt="Terceiro ano de namoro">
                             <span class="timeline__date">Foto tirada na segunda, 27 de janeiro de 2025</span>
                             <h3 class="timeline__card-title">Nosso terceiro ano</h3>
@@ -202,9 +205,9 @@
                         </div>
                     </li>
 
-                    <li class="timeline__item timeline__item--current" data-aos="fade-left">
+                    <li class="timeline__item timeline__item--current">
                         <span class="timeline__marker">4</span>
-                        <div class="timeline__card">
+                        <div class="timeline__card" data-aos="fade-left">
                             <img class="timeline__image" src="./assets/images/quarto_ano.jpg" alt="Quarto ano de namoro">
                             <span class="timeline__date">Foto tirada no domingo, 8 de fevereiro de 2026</span>
                             <h3 class="timeline__card-title">Nosso quarto ano</h3>
@@ -259,12 +262,15 @@
     <!-- =============================== -->
     <!-- Music Player (fixo, fora do smooth-wrapper) -->
     <!-- =============================== -->
-    <aside class="music-player" id="musicPlayer" aria-label="Player de música">
-        <audio id="mpAudio" src="./assets/audio/se_voce_quiser.mp3" loop preload="auto"></audio>
+    <audio id="mpAudio" src="./assets/audio/se_voce_quiser.mp3" loop preload="auto"></audio>
 
+    <aside class="music-player" id="musicPlayer" aria-label="Player de música">
+        
         <!-- Versão minimizada (disco com a capa) -->
         <button class="music-player__mini" id="mpMini" type="button" aria-label="Abrir player">
-            <img src="./assets/images/se_voce_quiser.jpg" alt="">
+            <span class="music-player__disc">
+                <img class="music-player__disc-label" src="./assets/images/se_voce_quiser.jpg" alt="">
+            </span>
         </button>
 
         <!-- Card completo -->
@@ -338,6 +344,10 @@
         </div>
     </aside>
 
+    <div class="glass-object" id="glassObject" aria-hidden="true">
+        <canvas class="glass-object__canvas" id="glassCanvas"></canvas>
+    </div>
+
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
@@ -346,6 +356,9 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollSmoother.min.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/music_player.js"></script>
+    <script src="scripts/timeline_path.js"></script>
     <script type="module" src="scripts/bouquet.js"></script>
+    <script type="module" src="scripts/glass_player.js"></script>
+    <script type="module" src="scripts/droplets_cover.js"></script>
 </body>
 </html>

@@ -1,4 +1,37 @@
 // ===============================
+// Imagens e vídeos: só para olhar
+// ===============================
+// - Não dá para arrastar imagem/vídeo (o "fantasminha" que segue o mouse)
+// - Clique direito em imagem/vídeo não abre menu (salvar, picture-in-picture...)
+// - Vídeos sem botão de picture-in-picture / popup / cast
+(function () {
+    const MIDIA = "img, video, .music-player__cover-canvas";
+
+    const ehMidia = (alvo) => alvo && alvo.closest && alvo.closest(MIDIA);
+
+    // capture = true: roda antes de qualquer outro script da página
+    document.addEventListener("dragstart", (e) => {
+        if (ehMidia(e.target)) e.preventDefault();
+    }, true);
+
+    document.addEventListener("contextmenu", (e) => {
+        if (ehMidia(e.target)) e.preventDefault();
+    }, true);
+
+    document.querySelectorAll("img").forEach((img) => {
+        img.draggable = false;
+    });
+
+    document.querySelectorAll("video").forEach((v) => {
+        v.controls = false;
+        v.disablePictureInPicture = true;
+        v.disableRemotePlayback = true;
+        v.setAttribute("disablepictureinpicture", "");
+        v.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
+    });
+})();
+
+// ===============================
 // Pré-loader
 // ===============================
 (function () {
@@ -68,6 +101,60 @@ AOS.init();
 
     atualizar(); // já preenche na hora, sem esperar 1s
     intervalo = setInterval(atualizar, 1000);
+})();
+
+// ===============================
+// Hero: números pulam em sequência a cada 10s
+// ===============================
+(function () {
+    const grid = document.getElementById("heroCounter");
+    if (!grid || !window.gsap) return;
+
+    const INTERVALO_MS = 10000;   // de quanto em quanto tempo pula
+    const ATRASO_ENTRE = 0.14;    // segundos entre uma caixa e a próxima (efeito "onda")
+    const SUBIDA = 0.24;          // duração da subida
+    const DESCIDA = 0.7;          // duração da descida (com quique)
+
+    const reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const celular = window.matchMedia("(max-width: 640px)");
+    const caixas = gsap.utils.toArray(".hero-counter__box", grid);
+
+    // valor inicial explícito para o GSAP conseguir interpolar a variável
+    gsap.set(caixas, { "--pulo": "0px" });
+
+    function pular() {
+        if (grid.hidden || document.hidden || reduzirMovimento.matches) return;
+
+        const altura = celular.matches ? -14 : -22; // px (negativo = sobe)
+        const tl = gsap.timeline();
+
+        // ordem do HTML: dias, horas, minutos, segundos
+        caixas.forEach((caixa, i) => {
+            const numero = caixa.querySelector(".hero-counter__number");
+            const inicio = i * ATRASO_ENTRE;
+
+            // sobe rápido
+            tl.to(caixa, { "--pulo": altura + "px", duration: SUBIDA, ease: "power2.out" }, inicio)
+              // desce quicando
+              .to(caixa, { "--pulo": "0px", duration: DESCIDA, ease: "bounce.out" }, inicio + SUBIDA)
+              // o número dá uma leve "inchada" junto com o pulo
+              .to(numero, { scale: 1.15, duration: SUBIDA, ease: "power2.out" }, inicio)
+              .to(numero, { scale: 1, duration: 0.6, ease: "elastic.out(1, 0.4)" }, inicio + SUBIDA);
+        });
+    }
+
+    // Dispara o pulo quando o número dos segundos (o que aparece na tela)
+    // chega em um múltiplo de 10: ...20, 10, 00, 50...
+    const elSegundos = document.getElementById("hcSegundos");
+    let ultimoSegundo = null;
+
+    gsap.ticker.add(() => {
+        const atual = parseInt(elSegundos.textContent, 10);
+        if (atual === ultimoSegundo) return;       // ainda é o mesmo segundo
+
+        ultimoSegundo = atual;
+        if (atual % (INTERVALO_MS / 1000) === 0) pular();
+    });
 })();
 
 // ===============================

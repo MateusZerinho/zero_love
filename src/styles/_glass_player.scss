@@ -1,0 +1,83 @@
+// ./styles/_glass_player.scss
+// ===============================
+// Music player dentro da placa de vidro 3D
+// ===============================
+//
+// O glass_player.js cria esta estrutura (você não escreve no HTML):
+//
+//   .glass-player              → caixa fixa do MESMO tamanho do card (área de arrastar)
+//     .glass-player__canvas    → WebGL: a placa de vidro (maior que o card = folga p/ girar)
+//     .glass-player__html      → camada CSS3D onde o player (HTML) é pendurado
+//
+// As camadas são maiores que o card e transparentes: a sobra não bloqueia cliques da página.
+.glass-player {
+    --glass-w: 300px;      // o JS ajusta com a largura real do card
+    --glass-h: 445px;      // o JS ajusta com a altura real do card
+    --glass-margin: 60px;  // distância da borda da tela. Precisa de folga: ao girar, a placa
+                           // pode passar alguns px do canto. Dá para diminuir se não se importar.
+
+    position: fixed;
+    left: var(--glass-margin);
+    bottom: max(var(--glass-margin), env(safe-area-inset-bottom));
+    width: var(--glass-w);
+    height: var(--glass-h);
+    z-index: 9000; // acima do conteúdo, abaixo do preloader (99999)
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    // Canto inferior DIREITO (onde o player ficava). Ative com  lado: "direita"  no glass_player.js
+    &--direita {
+        left: auto;
+        right: var(--glass-margin);
+    }
+
+    // Minimizado: só o disco, sem arrastar
+    &--fixo,
+    &--fixo:active {
+        cursor: default;
+    }
+
+    // As duas camadas ficam centralizadas na caixa e transbordam dela.
+    // O tamanho é definido em px pelo JS.
+    &__canvas,
+    &__html {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: block;
+        pointer-events: none; // só o card (e a caixa) recebem mouse
+    }
+
+    @media (max-width: 640px) {
+        display: none; // no celular o player volta a ser o card fixo normal
+    }
+}
+
+// O player enquanto está pendurado na cena 3D.
+// (especificidade maior que .music-player para anular o position: fixed / right / bottom)
+.music-player.music-player--glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+
+    // O fundo escuro do card é a "tela" que fica sobre o vidro: sem sombra, sem borda
+    .music-player__card {
+        border: 0;
+        border-radius: 18px; // cantos mais retos, como na referência
+        box-shadow: none;
+        transition: none;
+    }
+
+    // Minimizado: a placa vira uma moeda de vidro com o disco girando (o glass_player.js
+    // acompanha o tamanho). A sombra do disco sai porque ela ficaria por cima do vidro.
+    .music-player__disc {
+        box-shadow: none;
+    }
+}

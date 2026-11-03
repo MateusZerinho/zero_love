@@ -8,6 +8,7 @@
 @use 'love_counter';
 @use 'preloader';
 @use 'music_player';
+@use 'glass_player';
 @use 'variables';
 
 * {
@@ -37,6 +38,34 @@ html, body {
     @media (max-width: 1024px) {
         max-width: 90%;
     }
+}
+
+// ===============================
+// Cursor: sem o "I" de texto
+// ===============================
+// O cursor é uma propriedade herdada. Definindo na raiz, todo texto passa a mostrar
+// a setinha normal. Quem define o próprio cursor (botões, sliders com "pointer",
+// a placa de vidro com "grab") continua com o dele, porque a regra mais específica vence.
+html {
+    cursor: default;
+}
+
+// ===============================
+// Imagens e vídeos: só para olhar
+// ===============================
+// Impede arrastar ("pegar") a imagem e selecioná-la.
+// (O JS em main.js também bloqueia o arrastar e o clique direito.)
+img,
+video {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none; // iOS: sem o menu "Salvar imagem" ao segurar o dedo
+}
+
+// Os vídeos são só fundo decorativo: não precisam receber mouse nenhum.
+video {
+    pointer-events: none;
 }
 
 /* Chrome, Edge, Safari */

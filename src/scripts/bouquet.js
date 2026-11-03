@@ -1,21 +1,20 @@
 // ./scripts/bouquet.js
 // ===============================================================
-// Buquê 3D da linha do tempo (Three.js + GSAP ScrollTrigger)
+// Buquê 3D fixo na última section ("Cada segundo importa")
 // ===============================================================
 // Como funciona:
-//  1. O <canvas id="bouquetCanvas"> fica FIXO e ATRÁS do conteúdo da página.
-//  2. Com o buquê ativo, a .timeline fica transparente (veja _bouquet.scss).
-//     Assim o canvas aparece por trás dos cards (brancos e opacos): o buquê
-//     "passa por trás" deles e só aparece nos espaços vazios.
-//  3. Um ScrollTrigger acompanha a .timeline__list e informa qual ponto da
-//     lista está no centro da tela. A cada frame o buquê é colocado numa
-//     curva em S: fica no lado VAZIO de cada card e atravessa a linha central
-//     entre um card e o próximo, girando e inclinando durante a travessia.
-//  4. Só liga no desktop (> 640px). No celular o Three.js nem é baixado.
+//  1. O <canvas id="bouquetCanvas"> é colocado DENTRO da .love-counter, no lado
+//     esquerdo (o CSS está em _bouquet.scss). Como ele faz parte da section,
+//     rola junto com ela, sem nenhum cálculo de scroll.
+//  2. O buquê fica parado no centro desse canvas e só gira no próprio eixo
+//     vertical. Não flutua, não balança, não anda: só gira.
+//  3. Só renderiza enquanto a section está visível na tela (economiza GPU).
+//  4. Só liga no desktop (> 1024px). No celular o Three.js nem é baixado.
+//     Se não houver WebGL ou o .glb não existir, a section continua normal.
 // ===============================================================
 
-// GSAP e ScrollTrigger já são carregados pelo index.html (scripts clássicos, globais)
-const { gsap, ScrollTrigger } = window;
+// GSAP já é carregado pelo index.html (script clássico, global)
+const { gsap } = window;
 
 // ---------------------------------------------------------------
 // Ajustes (mexa aqui para calibrar)
@@ -24,26 +23,22 @@ const CONFIG = {
     // Caminho do modelo (relativo a este arquivo: scripts/ → assets/3d/)
     modelo: new URL("../assets/3d/bouquet.glb", import.meta.url).href,
 
-    // Tamanho do buquê na tela: vale o MENOR entre os três limites
-    alturaMaxPx: 440,        // nunca passa disso
-    alturaRelativaVh: 0.56,  // nem de 56% da altura da janela
-    larguraRelativaSlot: 0.88, // nem de 88% da largura do espaço vazio ao lado do card
+    // Remove os enfeites soltos (folhas, corações e pétalas voando em volta).
+    // Fica só o buquê. Quem decide é a distância até o centro do buquê.
+    removerEnfeites: true,
+    raioNucleo: 0.22,   // distância máxima (× tamanho total do modelo) para uma peça ficar.
+                        // Ainda sobra enfeite? Diminua (0.18). Sumiu parte do buquê? Aumente (0.28).
+    esconder: [],       // opcional: pedaços de nomes para remover à força. Ex.: ["heart", "leaf"]
+    manter: [],         // opcional: pedaços de nomes que NUNCA são removidos
 
-    // Curva em S
-    pausaNoLado: 0.2,                 // 0 a 0.4: parte do trajeto em que ele fica parado ao lado do card
-    giroNaTravessia: Math.PI * 2,     // volta completa ao atravessar (0 = não gira)
-    inclinacaoNaTravessia: 0.32,      // quanto "deita" na direção do movimento (radianos)
-    profundidadeNaTravessia: 1.4,     // afasta da câmera ao atravessar (dá sensação de profundidade)
-    viradaParaOCard: 0.32,            // quanto o buquê olha para o centro quando está de lado (radianos)
+    // Tamanho: quanto do canvas o buquê ocupa (1 = encosta nas bordas do canvas).
+    // O tamanho do canvas em si é controlado no _bouquet.scss.
+    preenchimento: 0.92,
 
-    // Movimento quando está parado ao lado do card
-    flutuarAmplitude: 0.03,           // proporção da altura do buquê
-    flutuarVelocidade: 1.1,
-    balancoYaw: 0.16,
-    velocidadeAnimacaoModelo: 0.7,    // animação que já vem no .glb (corações e pétalas girando)
-
-    // Suavização do movimento (maior = acompanha o scroll mais de perto)
-    suavizacao: 6,
+    // Movimento: SÓ gira no próprio eixo
+    velocidadeGiro: 0.6,    // radianos por segundo (0.6 ≈ uma volta a cada 10,5 s). Negativo gira ao contrário.
+    inclinacao: -0.2,       // inclinação fixa de lado, em radianos (negativo = topo inclinado para o centro da página). 0 = reto.
+    olharDeCima: 0.18,      // inclinação fixa para a câmera ver as flores de cima. 0 = de frente.
 
     // Câmera
     fov: 30,
@@ -60,128 +55,33 @@ const CONFIG = {
     },
 
     // Quando ligar e qualidade
-    mediaQueryDesktop: "(min-width: 641px)",
+    // (abaixo disso os contadores ocupam o centro e não sobra espaço ao lado)
+    mediaQueryDesktop: "(min-width: 1025px)",
     pixelRatioMax: 1.75,
 };
-
-// ---------------------------------------------------------------
-// Funções matemáticas puras (sem DOM)
-// ---------------------------------------------------------------
-const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
-const lerp = (a, b, t) => a + (b - a) * t;
-const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
-
-function smoothstep(inicio, fim, v) {
-    if (fim === inicio) return v >= fim ? 1 : 0;
-    const t = clamp((v - inicio) / (fim - inicio));
-    return t * t * (3 - 2 * t);
-}
-
-// Dado o ponto da lista que está no centro da tela (y), devolve onde o buquê
-// deve estar. lado: -1 = esquerda, +1 = direita, valores intermediários = atravessando.
-function estadoNaPosicao(y, g, cfg) {
-    const n = g.centros.length;
-    let lado = g.lados[0];
-    let e = 0;
-    let direcao = 0;
-
-    if (n > 1 && y > g.centros[0]) {
-        if (y >= g.centros[n - 1]) {
-            lado = g.lados[n - 1];
-        } else {
-            // descobre entre quais dois cards a tela está
-            let i = 0;
-            while (i < n - 2 && y > g.centros[i + 1]) i++;
-
-            const t = (y - g.centros[i]) / (g.centros[i + 1] - g.centros[i]); // 0 a 1 entre os centros
-            const p = clamp((t - cfg.pausaNoLado) / (1 - 2 * cfg.pausaNoLado));
-            e = easeInOutSine(p);
-            lado = lerp(g.lados[i], g.lados[i + 1], e);
-            direcao = Math.sign(g.lados[i + 1] - g.lados[i]);
-        }
-    } else if (n === 1) {
-        lado = g.lados[0];
-    }
-
-    // "Presença": o buquê cresce do zero quando a lista começa e encolhe até sumir no fim
-    const entrada = smoothstep(0.05 * g.alturaPx, 0.42 * g.alturaPx, y);
-    const iniSaida = g.centros[n - 1] + 0.2 * g.alturaUltimo;
-    const fimSaida = Math.max(iniSaida + 40, g.bordaFinal - 0.55 * g.alturaPx);
-    const saida = 1 - smoothstep(iniSaida, fimSaida, y);
-
-    return { lado, e, direcao, presenca: entrada * saida };
-}
 
 // ---------------------------------------------------------------
 // Estado
 // ---------------------------------------------------------------
 let THREE = null;
-let canvas, secao, lista, itens, html;
-let renderer, scene, camera, pivo, mixer;
+let canvas, secao, html;
+let renderer, scene, camera, pivo;
 let reduzirMovimento;
 let maiorDimensao = 1;
 
 let montagem = null;       // promessa do carregamento (Three.js + modelo)
 let montado = false;
 let habilitado = false;    // desktop + modelo carregado
-let naTela = false;        // a lista está visível na janela
+let visivel = false;       // a section está visível na janela (vem do IntersectionObserver)
+let naTela = false;        // o loop de render está ligado
 let loopLigado = false;
-let gatilho = null;
-let progresso = 0;         // 0 a 1 do ScrollTrigger
-let yAtual = 0;
-let primeiroQuadro = true;
-
-// Medidas do layout (recalculadas a cada refresh do ScrollTrigger)
-const geo = {
-    vw: 0,
-    vh: 0,
-    centroX: 0,
-    alturaLista: 0,
-    bordaFinal: 0,        // onde a .timeline termina, em coordenadas da lista
-    centros: [],          // y do centro de cada card, em coordenadas da lista
-    lados: [],            // lado onde o BUQUÊ fica em cada card (o lado vazio)
-    alturaUltimo: 0,
-    deslocamentoPx: 0,    // distância da linha central até o centro do espaço vazio
-    larguraSlot: 0,
-    alturaPx: 0,          // altura do buquê na tela
-    mundoPorPx: 0,        // quantas unidades 3D cabem em 1px (no plano do buquê)
-};
+let giro = 0;              // ângulo atual do buquê (radianos)
 
 // ---------------------------------------------------------------
-// Medidas e tamanho do canvas
+// Tamanho do canvas e do buquê
 // ---------------------------------------------------------------
-function medir() {
-    geo.vw = canvas.clientWidth;
-    geo.vh = canvas.clientHeight;
-    if (!geo.vw || !geo.vh || !camera) return;
-
-    const retLista = lista.getBoundingClientRect();
-    geo.centroX = retLista.left + retLista.width / 2;
-    geo.alturaLista = lista.offsetHeight;
-    geo.bordaFinal = geo.alturaLista + (parseFloat(getComputedStyle(secao).paddingBottom) || 0);
-
-    // offsetTop/offsetLeft ignoram transform (AOS e ScrollSmoother), então são seguros
-    geo.centros = itens.map((item) => item.offsetTop + item.offsetHeight / 2);
-    geo.lados = itens.map((item) => (item.offsetLeft + item.offsetWidth / 2 > lista.offsetWidth / 2 ? -1 : 1));
-    geo.alturaUltimo = itens[itens.length - 1].offsetHeight;
-
-    // centro do espaço vazio = mesma distância da linha central que o centro do card
-    const card = itens[0].querySelector(".timeline__card") || itens[0];
-    const centroCard = itens[0].offsetLeft + card.offsetLeft + card.offsetWidth / 2;
-    geo.deslocamentoPx = Math.abs(centroCard - lista.offsetWidth / 2);
-    geo.larguraSlot = card.offsetWidth;
-
-    geo.alturaPx = Math.min(
-        CONFIG.alturaMaxPx,
-        geo.vh * CONFIG.alturaRelativaVh,
-        geo.larguraSlot * CONFIG.larguraRelativaSlot
-    );
-
-    const alturaVisivelMundo = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
-    geo.mundoPorPx = alturaVisivelMundo / geo.vh;
-}
-
 function ajustarTamanho() {
+    if (!montado) return;
     const largura = canvas.clientWidth;
     const altura = canvas.clientHeight;
     if (!largura || !altura) return;
@@ -190,7 +90,14 @@ function ajustarTamanho() {
     renderer.setSize(largura, altura, false);
     camera.aspect = largura / altura;
     camera.updateProjectionMatrix();
-    medir();
+
+    // Escala: o maior lado do buquê ocupa `preenchimento` do MENOR lado do canvas
+    const alturaVisivelMundo = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
+    const mundoPorPx = alturaVisivelMundo / altura;
+    const alvoMundo = Math.min(largura, altura) * CONFIG.preenchimento * mundoPorPx;
+    pivo.scale.setScalar(alvoMundo / maiorDimensao);
+
+    if (naTela) renderer.render(scene, camera); // setSize limpa o canvas: redesenha já
 }
 
 // ---------------------------------------------------------------
@@ -199,7 +106,7 @@ function ajustarTamanho() {
 function criarLuzes() {
     const L = CONFIG.luz;
 
-    // Luz suave de todos os lados: céu rosado (cor do fundo da timeline) e chão coral
+    // Luz suave de todos os lados: céu rosado (cor do fundo da section) e chão coral
     const hemisferio = new THREE.HemisphereLight(0xfff1f3, 0xf77062, L.hemisferio);
 
     // Luz principal: quente, de cima e da direita, um pouco à frente
@@ -225,13 +132,67 @@ function criarAmbiente(RoomEnvironment) {
     scene.environment = textura;
 }
 
+function removerEnfeitesSoltos(modelo) {
+    modelo.updateMatrixWorld(true);
+
+    const pecas = [];
+    modelo.traverse((obj) => {
+        if (!obj.isMesh) return;
+        const caixa = new THREE.Box3().setFromObject(obj, true);
+        if (caixa.isEmpty()) return;
+        const tam = caixa.getSize(new THREE.Vector3());
+        pecas.push({
+            obj,
+            nome: obj.name || "(sem nome)",
+            caixa,
+            centro: caixa.getCenter(new THREE.Vector3()),
+            peso: tam.lengthSq() || 1e-9, // peças grandes (o buquê) pesam mais que as pequenas (enfeites)
+        });
+    });
+    if (!pecas.length) return;
+
+    // Centro do buquê = média dos centros das peças, ponderada pelo tamanho
+    const nucleo = new THREE.Vector3();
+    let somaPesos = 0;
+    pecas.forEach((p) => {
+        nucleo.addScaledVector(p.centro, p.peso);
+        somaPesos += p.peso;
+    });
+    nucleo.divideScalar(somaPesos);
+
+    const total = new THREE.Box3();
+    pecas.forEach((p) => total.union(p.caixa));
+    const limite = CONFIG.raioNucleo * Math.max(...total.getSize(new THREE.Vector3()).toArray());
+
+    const tem = (lista, nome) => lista.some((t) => nome.toLowerCase().includes(t.toLowerCase()));
+    const mantidas = [];
+    const removidas = [];
+
+    pecas.forEach((p) => {
+        const longe = p.centro.distanceTo(nucleo) > limite;
+        const remover = tem(CONFIG.esconder, p.nome) || (longe && !tem(CONFIG.manter, p.nome));
+        (remover ? removidas : mantidas).push(p);
+    });
+
+    // Segurança: se a regra apagaria tudo, não mexe em nada
+    if (!mantidas.length) {
+        console.warn("[buquê 3D] a limpeza removeria o modelo inteiro; ignorada. Aumente raioNucleo.");
+        return;
+    }
+
+    removidas.forEach((p) => p.obj.removeFromParent());
+    console.log("[buquê 3D] peças mantidas:", mantidas.map((p) => p.nome));
+    console.log("[buquê 3D] peças removidas:", removidas.map((p) => p.nome));
+}
+
 function prepararModelo(gltf) {
     const modelo = gltf.scene;
+    if (CONFIG.removerEnfeites) removerEnfeitesSoltos(modelo);
     const anisotropia = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
     modelo.traverse((obj) => {
         if (!obj.isMesh) return;
-        obj.frustumCulled = false; // as partes animadas saem do volume original
+        obj.frustumCulled = false;
 
         const materiais = Array.isArray(obj.material) ? obj.material : [obj.material];
         materiais.forEach((m) => {
@@ -258,19 +219,16 @@ function prepararModelo(gltf) {
     modelo.position.sub(centro);
     maiorDimensao = Math.max(tamanho.x, tamanho.y, tamanho.z) || 1;
 
-    // "Pivô": é ele que se move, gira e muda de escala. Ordem ZXY = inclina (Z) por fora,
-    // gira o buquê no próprio eixo (Y) por dentro.
+    // "Pivô": inclinação fixa por fora, giro no próprio eixo por dentro.
+    // Ordem ZXY = primeiro gira o buquê em Y (o eixo dele), depois aplica a inclinação.
     pivo = new THREE.Group();
     pivo.rotation.order = "ZXY";
-    pivo.visible = false;
     pivo.add(modelo);
+    pivo.rotation.set(CONFIG.olharDeCima, 0, CONFIG.inclinacao);
     scene.add(pivo);
 
-    // Animação que já vem no arquivo (corações e pétalas girando devagar)
-    if (gltf.animations && gltf.animations.length) {
-        mixer = new THREE.AnimationMixer(modelo);
-        gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
-    }
+    // Obs.: a animação que vem dentro do .glb (corações/pétalas girando) NÃO é tocada
+    // de propósito: o buquê só gira no próprio eixo.
 }
 
 // ---------------------------------------------------------------
@@ -286,7 +244,7 @@ async function montar() {
 
     renderer = new THREE.WebGLRenderer({
         canvas,
-        alpha: true, // o fundo rosa vem do CSS (_bouquet.scss)
+        alpha: true, // o fundo rosa é o da própria section
         antialias: true,
         powerPreference: "high-performance",
     });
@@ -304,8 +262,8 @@ async function montar() {
     const gltf = await new gltfMod.GLTFLoader().loadAsync(CONFIG.modelo);
     prepararModelo(gltf);
 
-    window.addEventListener("resize", () => habilitado && ajustarTamanho());
-    ScrollTrigger.addEventListener("refresh", () => habilitado && ajustarTamanho());
+    // O canvas muda de tamanho com a janela (CSS): acompanha
+    new ResizeObserver(() => habilitado && ajustarTamanho()).observe(canvas);
 
     montado = true;
 }
@@ -314,46 +272,14 @@ async function montar() {
 // Loop de animação (usa o ticker do GSAP, o mesmo do ScrollSmoother)
 // ---------------------------------------------------------------
 function quadro(tempo, deltaMs) {
-    if (!habilitado || !naTela || !geo.mundoPorPx) return;
+    if (!habilitado || !naTela) return;
 
     const dt = Math.min(deltaMs, 50) / 1000;
-    const reduzir = reduzirMovimento.matches;
 
-    // Ponto da lista que está no centro da tela (0 = topo da lista)
-    const yAlvo = -geo.vh / 2 + progresso * (geo.alturaLista + geo.vh);
-    if (primeiroQuadro) {
-        yAtual = yAlvo;
-        primeiroQuadro = false;
-    } else {
-        yAtual += (yAlvo - yAtual) * (1 - Math.exp(-CONFIG.suavizacao * dt));
-    }
+    // Único movimento: giro no próprio eixo (parado se o sistema pede menos movimento)
+    if (!reduzirMovimento.matches) giro += CONFIG.velocidadeGiro * dt;
 
-    const s = estadoNaPosicao(yAtual, geo, CONFIG);
-    pivo.visible = s.presenca > 0.002;
-
-    if (pivo.visible) {
-        const dip = Math.sin(Math.PI * s.e); // 0 nos lados, 1 no meio da travessia
-        const alturaMundo = geo.alturaPx * geo.mundoPorPx;
-
-        // Posição: x na curva em S, y no centro da tela (+ flutuação), z afasta ao atravessar
-        const xPx = geo.centroX + s.lado * geo.deslocamentoPx;
-        const flutuar = reduzir ? 0 : Math.sin(tempo * CONFIG.flutuarVelocidade) * CONFIG.flutuarAmplitude * alturaMundo;
-        pivo.position.set((xPx - geo.vw / 2) * geo.mundoPorPx, flutuar, -dip * CONFIG.profundidadeNaTravessia);
-
-        // Tamanho: cresce do zero ao entrar e encolhe ao sair
-        pivo.scale.setScalar((alturaMundo * s.presenca) / maiorDimensao);
-
-        // Rotação
-        const giro = reduzir ? 0 : CONFIG.giroNaTravessia;
-        const balanco = reduzir ? 0 : Math.sin(tempo * 0.6) * CONFIG.balancoYaw;
-        const yaw = -s.lado * CONFIG.viradaParaOCard + s.direcao * s.e * giro + balanco;
-        const roll = reduzir ? 0 : -s.direcao * dip * CONFIG.inclinacaoNaTravessia + Math.sin(tempo * 0.9) * 0.03;
-        const pitch = 0.16 + (reduzir ? 0 : Math.sin(tempo * 0.7) * 0.02);
-        pivo.rotation.set(pitch, yaw, roll);
-
-        if (mixer && !reduzir) mixer.update(dt * CONFIG.velocidadeAnimacaoModelo);
-    }
-
+    pivo.rotation.set(CONFIG.olharDeCima, giro, CONFIG.inclinacao);
     renderer.render(scene, camera);
 }
 
@@ -372,69 +298,57 @@ function desligarLoop() {
 function entrarNaTela() {
     if (!habilitado || naTela) return;
     naTela = true;
-    primeiroQuadro = true; // evita o buquê "voar" desde a última posição
     ligarLoop();
 }
 
 function sairDaTela() {
     naTela = false;
     desligarLoop();
-    if (montado) {
-        pivo.visible = false;
-        renderer.render(scene, camera); // limpa o último frame
-    }
 }
 
 // ---------------------------------------------------------------
-// Liga / desliga (breakpoint) e ScrollTrigger
+// Liga / desliga (breakpoint)
 // ---------------------------------------------------------------
-function criarGatilho() {
-    if (gatilho) return;
-    gatilho = ScrollTrigger.create({
-        trigger: lista,
-        start: "top bottom", // lista começa a entrar na janela
-        end: "bottom top",   // lista terminou de sair da janela
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-            progresso = self.progress;
-        },
-        onToggle: (self) => (self.isActive ? entrarNaTela() : sairDaTela()),
-    });
-}
-
 function habilitar() {
     if (habilitado) return;
     habilitado = true;
 
-    // Deixa a timeline transparente e mostra o canvas (veja _bouquet.scss)
+    // Mostra o canvas (veja _bouquet.scss) e mede o tamanho que o CSS deu a ele
     html.classList.add("buque-ativo");
-    criarGatilho();
-    ScrollTrigger.refresh(); // o padding da .timeline mudou, então recalcula as posições
     ajustarTamanho();
+    canvas.classList.add("buque-pronto"); // fade-in suave
 
-    progresso = gatilho.progress;
-    if (gatilho.isActive) entrarNaTela();
+    if (visivel) entrarNaTela();
 }
 
 function desabilitar() {
     if (!habilitado) return;
     sairDaTela();
     habilitado = false;
+    canvas.classList.remove("buque-pronto");
     html.classList.remove("buque-ativo");
-    ScrollTrigger.refresh();
 }
 
 async function iniciar() {
     canvas = document.getElementById("bouquetCanvas");
-    secao = document.querySelector(".timeline");
-    lista = document.querySelector(".timeline__list");
-    itens = Array.from(document.querySelectorAll(".timeline__item"));
+    secao = document.getElementById("loveCounter");
     html = document.documentElement;
 
-    if (!canvas || !secao || !lista || !itens.length || !window.gsap || !window.ScrollTrigger) return;
+    if (!canvas || !secao || !window.gsap) return;
+
+    // O canvas precisa ficar DENTRO da section para rolar junto com ela.
+    // (Se você já moveu a tag no HTML, este passo não faz nada.)
+    if (canvas.parentElement !== secao) secao.appendChild(canvas);
 
     reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
     const desktop = window.matchMedia(CONFIG.mediaQueryDesktop);
+
+    // Só gasta GPU enquanto a section está aparecendo
+    new IntersectionObserver((entradas) => {
+        visivel = entradas[entradas.length - 1].isIntersecting;
+        if (visivel) entrarNaTela();
+        else sairDaTela();
+    }).observe(secao);
 
     const sincronizar = async () => {
         try {
@@ -446,7 +360,7 @@ async function iniciar() {
                 desabilitar();
             }
         } catch (erro) {
-            // Sem WebGL ou modelo não encontrado: a timeline continua normal, só sem o buquê
+            // Sem WebGL ou modelo não encontrado: a section continua normal, só sem o buquê
             console.warn("[buquê 3D] não foi possível iniciar:", erro);
         }
     };
