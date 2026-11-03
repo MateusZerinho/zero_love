@@ -6,9 +6,18 @@
 // (que já é position: relative). Aqui só definimos ONDE ele fica e o TAMANHO dele.
 // O buquê gira no centro desse canvas e ocupa ~92% do lado menor (veja "preenchimento" no JS).
 //
-// A classe .buque-ativo é colocada no <html> pelo bouquet.js (desktop + modelo carregado).
-// Se o buquê não carregar (celular, sem WebGL, arquivo ausente), nada disso vale
+// Classes colocadas no <html> pelo bouquet.js:
+//   .buque-ativo    → o buquê está ligado (desktop OU celular)
+//   .buque-celular  → ligado no layout de celular (<= 640px)
+// Se o buquê não carregar (sem WebGL, arquivo ausente), nada disso vale
 // e a section continua exatamente como era.
+
+// ---------------------------------------------------------------
+// CELULAR: altura do espaço reservado para o buquê (acima do título)
+// Quer o buquê maior/menor no celular? Mexa só neste número.
+// ---------------------------------------------------------------
+$buque-altura-celular: 260px;
+
 .buque-canvas {
     display: none;
     opacity: 0;               // aparece com fade quando o JS adiciona .buque-pronto
@@ -16,6 +25,9 @@
     pointer-events: none;     // não bloqueia clique em nada
 }
 
+// ===============================
+// DESKTOP (igual ao que já era)
+// ===============================
 .buque-ativo .buque-canvas {
     display: block;
     position: absolute;
@@ -36,5 +48,25 @@
 
     &.buque-pronto {
         opacity: 1;
+    }
+}
+
+// ===============================
+// CELULAR (<= 640px): buquê centralizado, no espaço acima do título
+// ===============================
+// Mantenha este breakpoint igual ao mediaQueryCelular do bouquet.js.
+@media (max-width: 640px) {
+    // Abre espaço no topo da section para o buquê (o título e os contadores descem)
+    .buque-celular .love-counter {
+        padding-top: $buque-altura-celular + 8px;
+    }
+
+    // O canvas ocupa esse espaço, centralizado, e o buquê gira no meio dele
+    .buque-ativo.buque-celular .buque-canvas {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(100%, 360px);
+        height: $buque-altura-celular;
     }
 }

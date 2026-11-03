@@ -9,7 +9,12 @@
 //  2. O buquê fica parado no centro desse canvas e só gira no próprio eixo
 //     vertical. Não flutua, não balança, não anda: só gira.
 //  3. Só renderiza enquanto a section está visível na tela (economiza GPU).
-//  4. Só liga no desktop (> 1024px). No celular o Three.js nem é baixado.
+//  4. Dois modos (o CSS de cada um está em _bouquet.scss):
+//       - DESKTOP (> 1024px): buquê na faixa livre à esquerda dos contadores.
+//       - CELULAR (<= 640px): buquê centralizado no espaço logo acima do título
+//         "Cada segundo importa" (o html ganha a classe .buque-celular).
+//     Entre 641px e 1024px (tablet) o buquê não aparece, como antes.
+//     Fora desses modos o Three.js nem é baixado.
 //     Se não houver WebGL ou o .glb não existir, a section continua normal.
 // ===============================================================
 
@@ -58,6 +63,19 @@ const CONFIG = {
     // (abaixo disso os contadores ocupam o centro e não sobra espaço ao lado)
     mediaQueryDesktop: "(min-width: 1025px)",
     pixelRatioMax: 1.75,
+
+    // ---------------------------------------------------------------
+    // CELULAR: só os valores que MUDAM em relação ao desktop.
+    // O tamanho/posição do canvas no celular está no _bouquet.scss
+    // (variável $buque-altura-celular). Mantenha o breakpoint igual ao de lá (640px).
+    // ---------------------------------------------------------------
+    mediaQueryCelular: "(max-width: 640px)",
+    celular: {
+        preenchimento: 0.95,   // quanto do canvas o buquê ocupa
+        inclinacao: 0,         // reto: está centralizado, não precisa "apontar" para o meio da página
+        olharDeCima: 0.18,     // mesma vista de cima do desktop
+        pixelRatioMax: 2,      // o canvas é pequeno, então dá para manter nítido
+    },
 };
 
 // ---------------------------------------------------------------
@@ -76,6 +94,15 @@ let visivel = false;       // a section está visível na janela (vem do Interse
 let naTela = false;        // o loop de render está ligado
 let loopLigado = false;
 let giro = 0;              // ângulo atual do buquê (radianos)
+let modoCelular = false;   // true = layout de celular (buquê centralizado acima do título)
+
+// Valores em uso agora (desktop ou celular). Preenchido em habilitar().
+let ativo = {
+    preenchimento: CONFIG.preenchimento,
+    inclinacao: CONFIG.inclinacao,
+    olharDeCima: CONFIG.olharDeCima,
+    pixelRatioMax: CONFIG.pixelRatioMax,
+};
 
 // ---------------------------------------------------------------
 // Tamanho do canvas e do buquê
@@ -86,7 +113,7 @@ function ajustarTamanho() {
     const altura = canvas.clientHeight;
     if (!largura || !altura) return;
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.pixelRatioMax));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, ativo.pixelRatioMax));
     renderer.setSize(largura, altura, false);
     camera.aspect = largura / altura;
     camera.updateProjectionMatrix();
@@ -94,7 +121,7 @@ function ajustarTamanho() {
     // Escala: o maior lado do buquê ocupa `preenchimento` do MENOR lado do canvas
     const alturaVisivelMundo = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
     const mundoPorPx = alturaVisivelMundo / altura;
-    const alvoMundo = Math.min(largura, altura) * CONFIG.preenchimento * mundoPorPx;
+    const alvoMundo = Math.min(largura, altura) * ativo.preenchimento * mundoPorPx;
     pivo.scale.setScalar(alvoMundo / maiorDimensao);
 
     if (naTela) renderer.render(scene, camera); // setSize limpa o canvas: redesenha já
@@ -279,7 +306,7 @@ function quadro(tempo, deltaMs) {
     // Único movimento: giro no próprio eixo (parado se o sistema pede menos movimento)
     if (!reduzirMovimento.matches) giro += CONFIG.velocidadeGiro * dt;
 
-    pivo.rotation.set(CONFIG.olharDeCima, giro, CONFIG.inclinacao);
+    pivo.rotation.set(ativo.olharDeCima, giro, ativo.inclinacao);
     renderer.render(scene, camera);
 }
 
@@ -309,12 +336,27 @@ function sairDaTela() {
 // ---------------------------------------------------------------
 // Liga / desliga (breakpoint)
 // ---------------------------------------------------------------
-function habilitar() {
-    if (habilitado) return;
+// celular = true → layout de celular; false → layout de desktop
+function habilitar(celular) {
+    // Já ligado no mesmo modo: nada a fazer. Se a janela mudou de modo
+    // (ex.: girou o celular ou redimensionou), segue e reconfigura.
+    if (habilitado && celular === modoCelular) return;
     habilitado = true;
+    modoCelular = celular;
+
+    // Valores do modo atual (celular sobrescreve só o que foi definido em CONFIG.celular)
+    ativo = {
+        preenchimento: CONFIG.preenchimento,
+        inclinacao: CONFIG.inclinacao,
+        olharDeCima: CONFIG.olharDeCima,
+        pixelRatioMax: CONFIG.pixelRatioMax,
+        ...(celular ? CONFIG.celular : {}),
+    };
+    pivo.rotation.set(ativo.olharDeCima, giro, ativo.inclinacao);
 
     // Mostra o canvas (veja _bouquet.scss) e mede o tamanho que o CSS deu a ele
     html.classList.add("buque-ativo");
+    html.classList.toggle("buque-celular", celular);
     ajustarTamanho();
     canvas.classList.add("buque-pronto"); // fade-in suave
 
@@ -325,8 +367,9 @@ function desabilitar() {
     if (!habilitado) return;
     sairDaTela();
     habilitado = false;
+    modoCelular = false;
     canvas.classList.remove("buque-pronto");
-    html.classList.remove("buque-ativo");
+    html.classList.remove("buque-ativo", "buque-celular");
 }
 
 async function iniciar() {
@@ -342,6 +385,7 @@ async function iniciar() {
 
     reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
     const desktop = window.matchMedia(CONFIG.mediaQueryDesktop);
+    const celular = window.matchMedia(CONFIG.mediaQueryCelular);
 
     // Só gasta GPU enquanto a section está aparecendo
     new IntersectionObserver((entradas) => {
@@ -352,12 +396,15 @@ async function iniciar() {
 
     const sincronizar = async () => {
         try {
-            if (desktop.matches) {
+            if (desktop.matches || celular.matches) {
                 if (!montagem) montagem = montar();
                 await montagem;
-                if (desktop.matches) habilitar();
+                // confere de novo: a janela pode ter mudado enquanto o modelo carregava
+                if (desktop.matches) habilitar(false);
+                else if (celular.matches) habilitar(true);
+                else desabilitar();
             } else {
-                desabilitar();
+                desabilitar(); // tablet (641px a 1024px): sem buquê
             }
         } catch (erro) {
             // Sem WebGL ou modelo não encontrado: a section continua normal, só sem o buquê
@@ -366,6 +413,7 @@ async function iniciar() {
     };
 
     desktop.addEventListener("change", sincronizar);
+    celular.addEventListener("change", sincronizar);
     sincronizar();
 }
 

@@ -319,13 +319,18 @@ document.addEventListener("DOMContentLoaded", function () {
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 // ScrollSmoother (IDs CORRETOS)
+// Celular/tablet (só toque, sem mouse): usa a rolagem NATIVA do aparelho.
+// O normalizeScroll e o smoothTouch faziam o dedo "controlar" a rolagem via JS,
+// o que deixava tudo mais rápido. No desktop (mouse) continua igual.
+const dispositivoToque = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
 const smoother = ScrollSmoother.create({
     wrapper: "#smooth-wrapper",
     content: "#smooth-content",
     smooth: 2,
     effects: true,
-    normalizeScroll: true,
-    smoothTouch: 0.1
+    normalizeScroll: !dispositivoToque,
+    smoothTouch: false
 });
 
 // ===============================
