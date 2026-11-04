@@ -1,0 +1,24 @@
+// ./styles/_texto_reveal.scss
+// ===============================
+// Títulos com animação letra por letra (scripts/titulos_reveal.js)
+// ===============================
+// O JS põe a classe .texto-reveal em cada título e o SplitText cria, dentro dele,
+// uma máscara por linha (.reveal__line-mask) e <div>/<span> para linhas, palavras e letras.
+
+.texto-reveal {
+    // A máscara de cada linha corta EXATAMENTE na altura da linha, e isso cortaria os
+    // laços e as caudas da Pacifico (q, ç, p...). Trocamos o corte por um clip-path com
+    // folga: a letra que sobe só aparece depois de cruzar a linha, mas os laços não são cortados.
+    .reveal__line-mask {
+        overflow: visible !important; // anula o "overflow: clip" que o SplitText põe inline
+        clip-path: inset(-0.3em -0.5em);
+    }
+
+    // O reset global (* { font-family: Roboto; color: #fff }) pegaria todos os elementos
+    // criados pelo SplitText e trocaria a fonte (Pacifico) e a cor (vermelho) do título.
+    // Aqui todos voltam a herdar do título.
+    * {
+        font-family: inherit;
+        color: inherit;
+    }
+}
