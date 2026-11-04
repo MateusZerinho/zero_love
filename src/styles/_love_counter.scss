@@ -59,6 +59,12 @@
     }
 
     &__box {
+        position: relative;
+        isolation: isolate; // deixa o ::after (z-index: -1) atrás do texto, mas na frente do fundo branco
+
+        // O GSAP anima estas duas variáveis (veja love_counter_wave.js)
+        translate: 0 var(--onda, 0px);
+
         background-color: #fff;
         border: 1px solid #ffe3e8;
         border-radius: 18px;
@@ -74,6 +80,18 @@
         &:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 28px rgba(195, 20, 50, .16);
+        }
+
+        // Sombra do estado "selecionado", ligada pela onda
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
+            box-shadow: 0 12px 28px rgba(195, 20, 50, .16); // mesma sombra do :hover
+            opacity: var(--onda-t, 0);
+            pointer-events: none;
         }
     }
 
