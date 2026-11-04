@@ -26,6 +26,17 @@ html, body {
     overflow: hidden;
 }
 
+// Telas de toque: libera a rolagem nativa do navegador
+// (a classe é colocada no <html> pelo main.js)
+html.scroll-nativo {
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    body {
+        overflow: visible;
+    }
+}
+
 .container {
     max-width: 960px;
     width: 100%;

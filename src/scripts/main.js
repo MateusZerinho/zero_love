@@ -297,14 +297,20 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 // O ScrollTrigger também tenta restaurar o scroll no refresh
 ScrollTrigger.clearScrollMemory("manual");
 
-// ScrollSmoother (IDs CORRETOS)
+// Tela de toque (celular/tablet): usa a rolagem NATIVA do navegador,
+// sem suavização nem normalização do GSAP. No desktop continua como antes.
+const ehToque = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+// O CSS usa esta classe para liberar a rolagem nativa (veja _base/main.scss)
+document.documentElement.classList.toggle("scroll-nativo", ehToque);
+
 const smoother = ScrollSmoother.create({
     wrapper: "#smooth-wrapper",
     content: "#smooth-content",
-    smooth: 2,
+    smooth: ehToque ? 0 : 2,
     effects: true,
-    normalizeScroll: true,
-    smoothTouch: 0.1
+    normalizeScroll: !ehToque,   // era `true`: era isso que acelerava o toque
+    smoothTouch: false           // era `0.1`: no toque, rolagem nativa
 });
 
 // ===============================

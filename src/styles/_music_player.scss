@@ -26,6 +26,10 @@ $mp-play-icon: 28px;       // ícone do play/pause (antes: 34px)
 
 $mp-thumb: 16px; // tamanho do coração (a bolinha era 11px)
 
+$mp-range-hit: 24px;       // altura da área de toque das barras (a barra desenhada continua fina)
+$mp-track-h: 4px;          // espessura da barrinha desenhada
+$mp-thumb-touch: 24px;     // tamanho do coração em telas de toque
+
 // Coração branco (mesmo desenho usado na timeline)
 $mp-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
 
@@ -238,7 +242,7 @@ $mp-icon-dark: #0b0b0b;
         right: 0;
         bottom: calc(100% + 10px);
         width: 150px;
-        padding: 12px 14px;
+        padding: 4px 14px;   // era 12px 14px
         border-radius: 999px;
         background: rgba(18, 8, 11, 0.96);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -257,26 +261,58 @@ $mp-icon-dark: #0b0b0b;
     }
 
     // ---------- Slider (progresso e volume) ----------
+    // O <input> é ALTO (área de toque confortável pro dedo), mas a barrinha
+    // desenhada continua fina (4px) e centralizada nele.
     &__range {
         --progress: 0%;
+        --fill: #fff;                  // cor da parte já percorrida
+        --thumb: #{$mp-thumb};         // tamanho do coração
+
         -webkit-appearance: none;
         appearance: none;
         display: block;
         width: 100%;
-        height: 4px;
-        border-radius: 999px;
+        height: $mp-range-hit;
+        // puxa a altura extra pra dentro das margens: o layout do card não muda
+        margin: calc((#{$mp-track-h} - #{$mp-range-hit}) / 2) 0;
+        padding: 0;
+        background: transparent;
         outline: none;
         cursor: pointer;
-        background: linear-gradient(
-            to right,
-            #fff var(--progress),
-            $mp-track var(--progress)
-        );
+        touch-action: none;            // o dedo arrasta a barra, não a página
+        -webkit-tap-highlight-color: transparent;
 
+        // Telas de toque: coração maior, mais fácil de segurar
+        @media (pointer: coarse) {
+            --thumb: #{$mp-thumb-touch};
+        }
+
+        // a barra fina (a cor e o preenchimento ficam aqui)
+        &::-webkit-slider-runnable-track {
+            height: $mp-track-h;
+            border-radius: 999px;
+            background: linear-gradient(
+                to right,
+                var(--fill) var(--progress),
+                $mp-track var(--progress)
+            );
+        }
+        &::-moz-range-track {
+            height: $mp-track-h;
+            border-radius: 999px;
+            background: linear-gradient(
+                to right,
+                var(--fill) var(--progress),
+                $mp-track var(--progress)
+            );
+        }
+
+        // o coração
         &::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: $mp-thumb;
-            height: $mp-thumb;
+            width: var(--thumb);
+            height: var(--thumb);
+            margin-top: calc((#{$mp-track-h} - var(--thumb)) / 2); // centraliza na barra
             border: 0;
             border-radius: 0;
             background: $mp-heart center / contain no-repeat;
@@ -284,23 +320,23 @@ $mp-icon-dark: #0b0b0b;
             transition: transform 0.15s ease;
         }
         &::-moz-range-thumb {
-            width: $mp-thumb;
-            height: $mp-thumb;
+            width: var(--thumb);
+            height: var(--thumb);
             border: 0;
             border-radius: 0;
             background: $mp-heart center / contain no-repeat;
             transition: transform 0.15s ease;
         }
-        &:hover::-webkit-slider-thumb { transform: scale(1.25); }
-        &:hover::-moz-range-thumb { transform: scale(1.25); }
 
-        // o volume usa a cor verde
+        &:hover::-webkit-slider-thumb,
+        &:active::-webkit-slider-thumb { transform: scale(1.25); }
+        &:hover::-moz-range-thumb,
+        &:active::-moz-range-thumb { transform: scale(1.25); }
+
+        // o volume usa a cor verde e não precisa da margem negativa
         &--volume {
-            background: linear-gradient(
-                to right,
-                $mp-green var(--progress),
-                $mp-track var(--progress)
-            );
+            --fill: #{$mp-green};
+            margin: 0;
         }
     }
 
@@ -312,7 +348,7 @@ $mp-icon-dark: #0b0b0b;
     &__times {
         display: flex;
         justify-content: space-between;
-        margin-top: 8px;
+        margin-top: 10px;    // era 8px
         font-size: 12px;
         color: $mp-muted;
         font-variant-numeric: tabular-nums;
