@@ -513,6 +513,39 @@ $mp-icon-dark: #0b0b0b;
     }
 }
 
+// ===============================================================
+// Transição disco ⇄ card (animada pelo glass_player.js)
+// ===============================================================
+// Enquanto anima, o player mantém o layout do card ABERTO e o disco fica por cima,
+// no canto inferior direito. Assim a placa de vidro tem espaço para crescer do disco
+// até o card, e no fechamento o card continua na tela até a animação acabar.
+// Fica DEPOIS do bloco .music-player para vencer .is-collapsed (mesma especificidade).
+.music-player.is-transicao {
+    width: $mp-width;
+
+    @media (max-width: 640px) {
+        width: 236px; // mesma largura do celular, definida acima
+    }
+
+    .music-player__card { display: block; }
+
+    .music-player__mini {
+        display: block;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        z-index: 2;
+    }
+
+    // o disco não pode "reiniciar" o giro ao trocar de estado: mesma animação do .is-collapsed
+    .music-player__disc {
+        animation: mpSpin 3s linear infinite;
+        animation-play-state: paused;
+    }
+    &.is-playing .music-player__disc { animation-play-state: running; }
+}
+
 @keyframes mpSpin {
     to { transform: rotate(360deg); }
 }

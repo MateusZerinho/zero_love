@@ -16,6 +16,9 @@
 //  5. Liga no desktop E no celular (ligarNoCelular: true), desde que haja WebGL.
 //     Sem WebGL o player volta a ser o card fixo de sempre.
 //     No celular o toque funciona como o mouse: arrastar sobre o card gira a placa.
+//  6. Abrir/fechar: a placa de vidro CRESCE a partir do disco (círculo → retângulo,
+//     ancorada no canto inferior direito) e o card se revela junto, recortado pela
+//     própria placa. Fechar é o mesmo movimento ao contrário. Veja "Transição".
 // ===============================================================
 
 import * as THREE from "three";
@@ -85,6 +88,15 @@ const CONFIG = {
     exposicao: 1,
     pixelRatioMax: 2,
     pixelRatioMaxCelular: 1.5, // vidro com transmissão é pesado: no celular rende menos pixels
+
+    // Animação disco ⇄ placa de vidro (abrir e fechar)
+    // Os intervalos [início, fim] são em "p": 0 = só o disco, 1 = placa aberta.
+    transicao: {
+        duracao: 0.8,               // s
+        discoSome: [0, 0.35],       // o disco desaparece nesta faixa
+        cartaoAparece: [0.3, 0.85], // o card aparece nesta faixa
+        cartaoEscala: 0.9,          // o card começa nesta escala e "assenta" em 1
+    },
 };
 
 // Elementos que NÃO devem iniciar o arrasto (continuam clicáveis)
@@ -241,7 +253,8 @@ function pintarGradiente(geo) {
 // Placa com contorno externo (larg × alt) e cantos de raio `raio`.
 // O chanfro faz o contorno CRESCER `chanfro` px além da forma base; compensamos
 // para o tamanho final bater exatamente com larg × alt.
-function criarGeometriaPlaca(larg, alt, raio) {
+// leve = true: menos segmentos. Usado nos quadros da animação (a geometria é refeita a cada quadro).
+function criarGeometriaPlaca(larg, alt, raio, leve = false) {
     const { espessura, chanfro } = CONFIG;
     const forma = retanguloArredondado(larg - 2 * chanfro, alt - 2 * chanfro, raio - chanfro);
     let geo = new THREE.ExtrudeGeometry(forma, {
@@ -250,8 +263,8 @@ function criarGeometriaPlaca(larg, alt, raio) {
         bevelThickness: chanfro,
         bevelSize: chanfro,
         bevelOffset: 0,
-        bevelSegments: 6,
-        curveSegments: 24,
+        bevelSegments: leve ? 4 : 6,
+        curveSegments: leve ? 10 : 24,
     });
     geo = toCreasedNormals(geo, Math.PI / 7);
     achatarTampas(geo);
@@ -278,7 +291,17 @@ let distancia = 1000;
 let calma = 0; // 0 = flutuando, 1 = parado (mouse em cima do card)
 let calmaAlvo = 0;
 let ultimoMs = 0;
-let minimizadoAntes = null;
+
+// Transição disco ⇄ placa
+let card, mini;
+let observadorClasse;
+const FRENTE = new THREE.Vector3(0, 0, 1);
+const qTmp = new THREE.Quaternion();
+const medidas = { W: 0, H: 0, raio: CONFIG.raioPadrao, D: 68 }; // card aberto (W×H) e disco (D)
+const abertura = { p: 0 }; // 0 = só o disco · 1 = placa aberta
+let alvoAbertura = 0;
+let emTransicao = false;
+let transicao = null;      // { t0, dur, de, para, qIni }
 
 // Qualidade de renderização: menor no celular (economiza GPU e bateria)
 function pixelRatioAtual() {
@@ -379,44 +402,166 @@ function montar() {
 // ---------------------------------------------------------------
 // Medidas: o card manda; placa, camera e camadas se ajustam a ele
 // ---------------------------------------------------------------
-function raioDoCard() {
-    // Minimizado: a placa acompanha o disco (círculo). Aberto: acompanha o card.
-    const minimizado = player.classList.contains("is-collapsed");
-    const el = (minimizado ? player.querySelector(CONFIG.seletorMini) : player.querySelector(CONFIG.seletorCard)) || player;
-    const bruto = getComputedStyle(el).borderTopLeftRadius;
-    const valor = parseFloat(bruto);
-    if (!(valor > 0)) return CONFIG.raioPadrao;
-    // "50%" vira metade do menor lado (a geometria limita ao máximo possível: círculo perfeito)
-    return bruto.includes("%") ? (valor / 100) * Math.min(el.offsetWidth, el.offsetHeight) : valor;
-}
-
 const aquietar = () => (calmaAlvo = 1);
 const soltar = () => (calmaAlvo = 0);
 
 const par = (n) => Math.max(2, Math.round(n / 2) * 2);
 
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const mistura = (a, b, t) => a + (b - a) * t;
+const suave = (x) => x * x * (3 - 2 * x);
+const faixa = (p, [a, b]) => suave(clamp01((p - a) / (b - a)));
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+
+const estaMinimizado = () => player.classList.contains("is-collapsed");
+
+// Tamanho do card aberto, raio dele e diâmetro do disco.
+// Largura/altura do card só valem com ele visível (escondido, offsetWidth é 0):
+// nesse caso mantém a última medida.
+function lerMedidas() {
+    if (card.offsetWidth > 0 && card.offsetHeight > 0) {
+        medidas.W = card.offsetWidth;
+        medidas.H = card.offsetHeight;
+    }
+    const raio = parseFloat(getComputedStyle(card).borderTopLeftRadius);
+    medidas.raio = raio > 0 ? raio : CONFIG.raioPadrao;
+
+    const disco = mini.offsetWidth || parseFloat(getComputedStyle(mini).width);
+    if (disco > 0) medidas.D = disco;
+}
+
+// Placa de vidro no ponto atual da transição (abertura.p).
+// A forma vai de um círculo do tamanho do disco até o retângulo do card, sempre
+// ancorada no canto inferior direito (onde o disco fica na tela).
+function atualizarPlaca(leve) {
+    const p = abertura.p;
+    placa.visible = p > 0.002 && medidas.W > 0;
+    if (!placa.visible) return;
+
+    const { W, H, raio, D } = medidas;
+    const w = mistura(D, W, p);
+    const h = mistura(D, H, p);
+    const r = mistura(D / 2, raio, p);
+    const m = CONFIG.moldura * clamp01(p * 2); // o vidro em volta do card nasce junto
+
+    placa.geometry.dispose();
+    placa.geometry = criarGeometriaPlaca(w + 2 * m, h + 2 * m, r + m, leve);
+    // o centro da placa anda do disco (canto) até o centro do card
+    placa.position.set((W - w) / 2, (h - H) / 2, 0);
+}
+
+// Disco, card e placa no ponto atual da transição
+function aplicarAbertura(leve) {
+    const p = abertura.p;
+    const T = CONFIG.transicao;
+    const disco = 1 - faixa(p, T.discoSome);
+    const cartao = faixa(p, T.cartaoAparece);
+    const { W, H, raio, D } = medidas;
+
+    mini.style.opacity = disco.toFixed(3);
+    mini.style.transform = `scale(${mistura(0.8, 1, disco).toFixed(3)})`;
+
+    // O card é recortado pelo MESMO retângulo da placa: ele "se desdobra" do canto
+    const w = mistura(D, W, p);
+    const h = mistura(D, H, p);
+    const r = mistura(D / 2, raio, p);
+    card.style.opacity = cartao.toFixed(3);
+    card.style.clipPath =
+        p >= 1 ? "" : `inset(${(H - h).toFixed(1)}px 0px 0px ${(W - w).toFixed(1)}px round ${r.toFixed(1)}px)`;
+    card.style.transform = `scale(${mistura(T.cartaoEscala, 1, cartao).toFixed(3)})`;
+
+    atualizarPlaca(leve);
+}
+
+function limparTransicao() {
+    for (const prop of ["opacity", "transform"]) mini.style.removeProperty(prop);
+    for (const prop of ["opacity", "transform", "clip-path"]) card.style.removeProperty(prop);
+}
+
+// ---------------------------------------------------------------
+// Transição disco ⇄ placa
+// ---------------------------------------------------------------
+// O music_player.js só liga/desliga a classe .is-collapsed. Aqui observamos essa classe
+// e, em vez de trocar de uma vez, animamos "abertura.p" de 0 a 1 (ou de 1 a 0).
+// Enquanto anima, o player ganha .is-transicao (veja _music_player.scss): o layout
+// fica com o card ABERTO e o disco por cima, no canto. Assim a placa tem tamanho
+// de sobra para crescer, e no fechamento o card continua na tela até a animação acabar.
+function iniciarTransicao(alvo) {
+    // Menos movimento: troca direto, sem animar
+    if (reduzirMovimento.matches) {
+        abertura.p = alvo;
+        emTransicao = false;
+        transicao = null;
+        limparTransicao();
+        player.classList.remove("is-transicao");
+        camera.position.set(0, 0, 1);
+        medir();
+        return;
+    }
+
+    // A placa volta de frente DURANTE a animação (e não de uma vez)
+    const qIni = new THREE.Quaternion().setFromUnitVectors(FRENTE, camera.position.clone().normalize());
+
+    emTransicao = true;
+    player.classList.add("is-transicao");
+    transicao = {
+        t0: performance.now(),
+        dur: Math.max(1, CONFIG.transicao.duracao * Math.abs(alvo - abertura.p) * 1000),
+        de: abertura.p,
+        para: alvo,
+        qIni,
+    };
+
+    medir();                // já com o layout do card aberto
+    aplicarAbertura(true);  // primeiro quadro certo, antes de o navegador pintar
+}
+
+function finalizarTransicao() {
+    if (transicao) abertura.p = transicao.para;
+    transicao = null;
+    emTransicao = false;
+
+    camera.position.set(0, 0, 1);
+    limparTransicao();
+    player.classList.remove("is-transicao");
+    medir(); // no fechamento: o card some, a caixa encolhe até o disco e a placa esconde
+}
+
+function aoMudarClasse() {
+    if (!habilitado) return;
+    const alvo = estaMinimizado() ? 0 : 1;
+    if (alvo === alvoAbertura) return; // mudou outra classe (is-playing, is-transicao...)
+    alvoAbertura = alvo;
+    iniciarTransicao(alvo);
+}
+
+// ---------------------------------------------------------------
+// Medidas: o card manda; placa, camera e camadas se ajustam a ele
+// ---------------------------------------------------------------
 function medir() {
+    lerMedidas();
+
     const w = player.offsetWidth;
     const h = player.offsetHeight;
     if (!w || !h) return;
 
-    const { moldura, espessura, chanfro, sala, salaMinima, fov } = CONFIG;
+    const { espessura, chanfro, sala, salaMinima, fov } = CONFIG;
 
     renderer.setPixelRatio(pixelRatioAtual());
 
-    // Placa
-    placa.geometry.dispose();
-    placa.geometry = criarGeometriaPlaca(w + 2 * moldura, h + 2 * moldura, raioDoCard() + moldura);
+    // Placa (parada no ponto atual da transição: aberta = igual ao card)
     vidro.thickness = (espessura + 2 * chanfro) * CONFIG.vidro.espessuraOptica;
+    atualizarPlaca(false);
 
     // O card fica colado na face da frente da placa
     objetoCss.position.z = espessura / 2 + chanfro;
 
-    // Caixa fixa do tamanho do card (o SCSS usa para posicionar)
+    // Caixa fixa do tamanho do player (o SCSS usa para posicionar)
     caixa.style.setProperty("--glass-w", `${w}px`);
     caixa.style.setProperty("--glass-h", `${h}px`);
 
-    // Camadas (canvas + HTML) maiores que o card: folga para girar sem cortar
+    // Camadas (canvas + HTML) maiores que o player: folga para girar sem cortar
     const largura = par(Math.max(w * sala, w + 2 * salaMinima));
     const altura = par(Math.max(h * sala, h + 2 * salaMinima));
     canvas.style.width = `${largura}px`;
@@ -431,21 +576,17 @@ function medir() {
     camera.near = 1;
     camera.far = distancia * 4;
 
-    // Ao minimizar/abrir, a placa volta de frente (senão o disco poderia ficar de costas)
-    const minimizado = player.classList.contains("is-collapsed");
-    if (minimizadoAntes !== null && minimizado !== minimizadoAntes) camera.position.set(0, 0, 1);
-    minimizadoAntes = minimizado;
-
-    // Minimizado: só o disco, sem a placa de vidro em volta
-    placa.visible = !minimizado;
-
-    // Minimizado: o disco fica sempre de frente (sem arrastar para girar)
-    controls.enableRotate = !minimizado;
-    caixa.classList.toggle("glass-player--fixo", minimizado);
+    // Só gira (arrastando) com a placa totalmente aberta. Disco e transição ficam de frente.
+    const parado = emTransicao || abertura.p < 1;
+    controls.enableRotate = !parado;
+    caixa.classList.toggle("glass-player--fixo", parado);
 
     camera.position.setLength(distancia);
     camera.updateProjectionMatrix();
     controls.update();
+
+    // setSize limpa o canvas: redesenha já, senão ele pisca até o próximo quadro
+    renderer.render(scene, camera);
 }
 
 // ---------------------------------------------------------------
@@ -460,10 +601,24 @@ function quadro(agoraMs) {
     calma += (calmaAlvo - calma) * (1 - Math.exp(-dt * 6));
     const k = 1 - calma;
 
+    // Transição disco ⇄ placa
+    if (transicao) {
+        const x = clamp01((agoraMs - transicao.t0) / transicao.dur);
+        if (x >= 1) {
+            finalizarTransicao();
+        } else {
+            abertura.p = mistura(transicao.de, transicao.para, easeInOut(x));
+            // câmera volta de frente de forma suave (rotação esférica, sem atravessar a placa)
+            qTmp.identity().slerp(transicao.qIni, 1 - easeOut(x));
+            camera.position.copy(FRENTE).applyQuaternion(qTmp).setLength(distancia);
+            aplicarAbertura(true);
+        }
+    }
+
     controls.update();
 
-    // Minimizado: o disco não balança de lado, fica de frente (só flutua para cima e para baixo)
-    const girar = player.classList.contains("is-collapsed") ? 0 : 1;
+    // O balanço de lado cresce junto com a abertura: disco de frente, placa aberta balançando
+    const girar = abertura.p;
 
     if (!reduzirMovimento.matches) {
         const t = (agoraMs / 1000) * CONFIG.velocidade;
@@ -502,6 +657,10 @@ function habilitar() {
     if (!montado) montar();
     protegerAudio();
 
+    card = player.querySelector(CONFIG.seletorCard);
+    mini = player.querySelector(CONFIG.seletorMini);
+    if (!card || !mini) throw new Error("card ou disco do player não encontrados");
+
     caixa.style.display = "";
     player.classList.add("music-player--glass");
     document.documentElement.classList.add("glass-player-ativo");
@@ -510,9 +669,16 @@ function habilitar() {
     grupo.add(objetoCss);
     habilitado = true;
 
+    // Estado inicial: minimizado = só o disco (p = 0) · aberto = placa inteira (p = 1)
+    alvoAbertura = abertura.p = estaMinimizado() ? 0 : 1;
+    emTransicao = false;
+    transicao = null;
+
     medir();
     cssRenderer.render(scene, camera); // já move o player para dentro da camada 3D
     observador.observe(player);
+    observadorClasse = new MutationObserver(aoMudarClasse);
+    observadorClasse.observe(player, { attributes: true, attributeFilter: ["class"] });
     player.addEventListener("pointerenter", aquietar);
     player.addEventListener("pointerleave", soltar);
     renderer.setAnimationLoop(quadro);
@@ -522,10 +688,14 @@ function desabilitar() {
     if (!habilitado) return;
     renderer.setAnimationLoop(null);
     observador.disconnect();
+    observadorClasse?.disconnect();
     player.removeEventListener("pointerenter", aquietar);
     player.removeEventListener("pointerleave", soltar);
     calma = calmaAlvo = 0;
-    minimizadoAntes = null;
+    transicao = null;
+    emTransicao = false;
+    limparTransicao();
+    player.classList.remove("is-transicao");
     habilitado = false;
 
     // Remover o objeto tira o elemento do DOM; devolvemos o player ao <body>
