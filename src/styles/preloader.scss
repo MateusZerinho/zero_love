@@ -84,3 +84,11 @@
         height: 100%;
     }
 }
+
+// Scroll travado enquanto o pré-loader está na tela (classe controlada pelo main.js).
+// O !important vence o html.scroll-nativo (celular), que libera o overflow-y.
+html.scroll-travado,
+html.scroll-travado body {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+}

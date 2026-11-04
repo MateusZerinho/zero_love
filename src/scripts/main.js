@@ -54,22 +54,68 @@
 })();
 
 // ===============================
-// Pré-loader
+// Pré-loader (trava o scroll até ele acabar)
 // ===============================
 (function () {
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
- 
+
+    const html = document.documentElement;
+    const TECLAS_DE_SCROLL = new Set([
+        " ", "Spacebar", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"
+    ]);
+
+    let travado = false;
+
+    const bloquear = (e) => e.preventDefault();
+    const bloquearTecla = (e) => {
+        if (TECLAS_DE_SCROLL.has(e.key)) e.preventDefault();
+    };
+    // Rede de segurança: se algo ainda conseguir rolar, volta para o topo
+    const voltarAoTopo = () => {
+        if (travado && window.scrollY !== 0) window.scrollTo(0, 0);
+    };
+
+    function travar() {
+        travado = true;
+        html.classList.add("scroll-travado"); // overflow: hidden (veja preloader.scss)
+        window.scrollTo(0, 0);
+
+        // passive: false é obrigatório para o preventDefault funcionar em wheel/touchmove
+        window.addEventListener("wheel", bloquear, { passive: false });
+        window.addEventListener("touchmove", bloquear, { passive: false });
+        window.addEventListener("keydown", bloquearTecla);
+        window.addEventListener("scroll", voltarAoTopo);
+    }
+
+    function liberar() {
+        travado = false;
+        window.removeEventListener("wheel", bloquear);
+        window.removeEventListener("touchmove", bloquear);
+        window.removeEventListener("keydown", bloquearTecla);
+        window.removeEventListener("scroll", voltarAoTopo);
+
+        window.scrollTo(0, 0);
+        html.classList.remove("scroll-travado");
+        window.__smoother?.paused(false); // destrava o ScrollSmoother (desktop)
+    }
+
+    // O main.js usa isto logo depois de criar o ScrollSmoother
+    window.preloaderScroll = { ativo: () => travado };
+
+    travar();
+
     // Tempo total da animação de preenchimento:
     // delay (0.4s) + duração (2s) + uma pausa extra antes de sair (0.3s) = ~2.7s
     const FILL_DURATION = 2700;
- 
+
     setTimeout(function () {
         preloader.classList.add("preloader--hidden");
- 
-        // Remove do DOM depois da transição de fade-out (0.8s)
+
+        // Remove do DOM depois da transição de fade-out (0.8s) e só então libera o scroll
         setTimeout(function () {
             preloader.remove();
+            liberar();
         }, 800);
     }, FILL_DURATION);
 })();
@@ -320,6 +366,10 @@ const smoother = ehToque
           normalizeScroll: true,
           smoothTouch: 0.1
       });
+
+// Guarda para o pré-loader poder destravar, e já nasce pausado se ele ainda estiver na tela
+window.__smoother = smoother;
+if (window.preloaderScroll?.ativo()) smoother?.paused(true);
 
 // ===============================
 // Fotos das sections .event: "selecionada" ao rolar
