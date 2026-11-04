@@ -26,14 +26,31 @@ html, body {
     overflow: hidden;
 }
 
-// Telas de toque: libera a rolagem nativa do navegador
+// Telas de toque: rolagem nativa do navegador, sem ScrollSmoother.
 // (a classe é colocada no <html> pelo main.js)
 html.scroll-nativo {
+    height: auto;
     overflow-x: hidden;
     overflow-y: auto;
 
     body {
+        height: auto;
         overflow: visible;
+    }
+
+    // A section dos cards fica presa (pin) ocupando a tela inteira.
+    // 100lvh = altura da tela com as barras do navegador recolhidas, então
+    // ela nunca fica mais baixa que a área visível (isso deixava uma faixa branca embaixo).
+    .sectionPai {
+        height: 100vh;  // reserva para navegadores sem suporte a lvh
+        height: 100lvh;
+    }
+
+    // Nada que vaze para fora do fim das sections pode aumentar a altura da página.
+    // overflow: clip corta sem criar um novo container de rolagem,
+    // então os pins do ScrollTrigger continuam funcionando.
+    #smooth-wrapper {
+        overflow: clip;
     }
 }
 
