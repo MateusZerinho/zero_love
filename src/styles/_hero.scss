@@ -42,6 +42,23 @@
         text-align: center;
         font-family: "Pacifico", cursive;
         font-weight: 500;
+
+        // Máscara de cada linha (criada pelo SplitText em hero_intro.js).
+        // Por padrão ela corta EXATAMENTE na altura da linha, e isso cortaria os
+        // laços e as caudas da Pacifico (q, ç, p...). Aqui trocamos o corte por um
+        // clip-path com folga: a letra que sobe só aparece depois de cruzar a linha,
+        // mas as caudas e os laços não são cortados.
+        .hero__line-mask {
+            overflow: visible !important; // anula o "overflow: clip" que o SplitText põe inline
+            clip-path: inset(-0.3em -0.5em);
+        }
+
+        // O SplitText cria <div>/<span> dentro do texto (linhas, palavras, letras).
+        // O reset global (* { font-family: Roboto }) pegaria todos eles e trocaria a
+        // Pacifico por Roboto. Aqui todos voltam a herdar a fonte do .hero__text.
+        * {
+            font-family: inherit;
+        }
     }
 
     &__logo {

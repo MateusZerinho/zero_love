@@ -1,4 +1,26 @@
 // ===============================
+// Sempre começar do topo ao recarregar
+// ===============================
+(function () {
+    // Impede o navegador de restaurar a posição de scroll anterior
+    if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+    }
+
+    // Remove #hash da URL (senão o navegador pula para a âncora)
+    if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+    }
+
+    window.scrollTo(0, 0);
+
+    // Alguns navegadores (Safari/Firefox) restauram depois do load e do bfcache
+    window.addEventListener("pageshow", function () {
+        window.scrollTo(0, 0);
+    });
+})();
+
+// ===============================
 // Imagens e vídeos: só para olhar
 // ===============================
 // - Não dá para arrastar imagem/vídeo (o "fantasminha" que segue o mouse)
@@ -89,7 +111,7 @@ AOS.init();
         if (distancia < 0) {
             clearInterval(intervalo);
             if (grid) grid.hidden = true;
-            if (texto) texto.innerHTML = "Hoje é o nosso dia 💕";
+            if (texto) texto.innerHTML = "O aniversário de namoro do melhor casal ja começou! <br> Parabéns, meu amor! ❤️";
             return;
         }
 
@@ -182,52 +204,6 @@ function createHeart() {
 setInterval(createHeart, 300);
 
 // ===============================
-// Intersection Observer (mobile)
-// ===============================
-document.addEventListener("DOMContentLoaded", function () {
-    const isTouchDevice =
-        "ontouchstart" in window || navigator.maxTouchPoints > 0;
-
-    if (!isTouchDevice) return;
-
-    const descriptions = document.querySelectorAll(
-        ".event__details__description"
-    );
-
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                const container = entry.target.closest(".container");
-                const image = container?.querySelector(".event__image");
-                if (!image) return;
-
-                if (entry.isIntersecting) {
-                    image.classList.add("event__image--active");
-                } else {
-                    image.classList.remove("event__image--active");
-                }
-            });
-        },
-        {
-            rootMargin: "0px 0px -40% 0px",
-            threshold: 0
-        }
-    );
-
-    descriptions.forEach((desc) => {
-        observer.observe(desc);
-
-        // ativação inicial
-        const rect = desc.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom >= 0) {
-            const container = desc.closest(".container");
-            const image = container?.querySelector(".event__image");
-            if (image) image.classList.add("event__image--active");
-        }
-    });
-});
-
-// ===============================
 // Contador desde o pedido de namoro
 // ===============================
 (function () {
@@ -318,6 +294,9 @@ document.addEventListener("DOMContentLoaded", function () {
 // ===============================
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
+// O ScrollTrigger também tenta restaurar o scroll no refresh
+ScrollTrigger.clearScrollMemory("manual");
+
 // ScrollSmoother (IDs CORRETOS)
 const smoother = ScrollSmoother.create({
     wrapper: "#smooth-wrapper",
@@ -327,6 +306,63 @@ const smoother = ScrollSmoother.create({
     normalizeScroll: true,
     smoothTouch: 0.1
 });
+
+// ===============================
+// Fotos das sections .event: "selecionada" ao rolar
+// ===============================
+// Uma foto de cada vez fica no estado de hover (levantada e um pouco maior).
+// Ela é selecionada quando o centro dela chega na "linha" da tela. Ela é solta
+// um pouco ANTES de a próxima ser selecionada, então há um intervalo em que
+// nenhuma foto está selecionada.
+(function () {
+    const fotos = gsap.utils.toArray(".event__image");
+    if (!fotos.length) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const celular = window.matchMedia("(max-width: 640px)");
+
+    const CONFIG = {
+        linha: 70,         // % da altura da tela em que a foto é selecionada. Maior = seleciona mais cedo
+        linhaCelular: 65,
+        folga: 12,         // intervalo entre uma sair e a próxima entrar (em % da altura da tela).
+                           // Maior = a foto sai mais cedo e o intervalo sem seleção é maior. 0 = troca direta
+        repouso: { y: 20, scale: 1 },      // mesmo estado do CSS
+        selecionada: { y: 0, scale: 1.03 },// mesmo estado do :hover
+        duracao: 0.6,
+        ease: "power2.out",
+    };
+
+    const linhaAtual = () => (celular.matches ? CONFIG.linhaCelular : CONFIG.linha);
+    const inicio = () => `center ${linhaAtual()}%`;
+    // A próxima foto chega aqui ANTES de chegar na linha de seleção dela
+    const fim = () => `center ${linhaAtual() + CONFIG.folga}%`;
+
+    function selecionar(img) {
+        gsap.to(img, { ...CONFIG.selecionada, duration: CONFIG.duracao, ease: CONFIG.ease, overwrite: true });
+    }
+
+    function soltar(img) {
+        gsap.to(img, { ...CONFIG.repouso, duration: CONFIG.duracao, ease: CONFIG.ease, overwrite: true });
+    }
+
+    fotos.forEach((img, i) => {
+        // O GSAP passa a controlar o transform: tira a transition do CSS
+        // (senão ela brigaria com cada quadro) e define o estado inicial.
+        img.style.transition = "opacity 0.6s ease";
+        gsap.set(img, { ...CONFIG.repouso, willChange: "transform" });
+
+        const proxima = fotos[i + 1];
+
+        ScrollTrigger.create({
+            trigger: img,
+            start: inicio,
+            endTrigger: proxima || img,
+            end: proxima ? fim : "bottom top",
+            invalidateOnRefresh: true,
+            onToggle: (self) => (self.isActive ? selecionar(img) : soltar(img)),
+        });
+    });
+})();
 
 // ===============================
 // Barra do Spotify fixa (GSAP pin)

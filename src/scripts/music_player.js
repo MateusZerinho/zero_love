@@ -21,7 +21,11 @@
     const volRange = document.getElementById("mpVolumeRange");
 
     const SALTO = 10; // segundos para os botões anterior/próximo
-    const VOLUME_INICIAL = 0.6;
+    // Fade-in do volume
+    const VOLUME_INICIAL = 0.02;  // quase inaudível
+    const VOLUME_FINAL = 0.10;    // o valor da barra de volume
+    const DURACAO_FADE = 20000;   // ms até chegar no volume final
+
     audio.volume = VOLUME_INICIAL;
     audio.loop = true;
 
@@ -91,10 +95,8 @@
     });
     btnMini.addEventListener("click", () => player.classList.remove("is-collapsed"));
 
-    // No celular começa minimizado para não cobrir o conteúdo
-    if (window.matchMedia("(max-width: 640px)").matches) {
-        player.classList.add("is-collapsed");
-    }
+    // Começa minimizado (só o disco) em qualquer tela
+    player.classList.add("is-collapsed");
 
     // ---------- Volume ----------
     function atualizarIconeVolume() {
@@ -123,6 +125,47 @@
         audio.volume = Number(volRange.value);
         pintar(volRange);
         atualizarIconeVolume();
+    });
+
+    // ---------- Fade-in do volume ----------
+    let fadeRaf = 0;
+    let fadeFeito = false;
+
+    function sincronizarVolumeUI() {
+        volRange.value = audio.volume;
+        pintar(volRange);
+        atualizarIconeVolume();
+    }
+
+    function cancelarFade() {
+        cancelAnimationFrame(fadeRaf);
+        fadeFeito = true; // não recomeça depois
+    }
+
+    function iniciarFade() {
+        if (fadeFeito) return;
+        fadeFeito = true;
+
+        const inicio = performance.now();
+        const passo = (agora) => {
+            const t = Math.min((agora - inicio) / DURACAO_FADE, 1);
+            const suave = 0.5 - 0.5 * Math.cos(Math.PI * t); // começa e termina devagar
+            audio.volume = VOLUME_INICIAL + (VOLUME_FINAL - VOLUME_INICIAL) * suave;
+            sincronizarVolumeUI();
+            if (t < 1) fadeRaf = requestAnimationFrame(passo);
+        };
+        fadeRaf = requestAnimationFrame(passo);
+    }
+
+    // O fade só começa quando a música realmente toca. Se o autoplay for bloqueado,
+    // isso acontece na primeira interação, e o fade começa nesse momento.
+    audio.addEventListener("play", iniciarFade);
+
+    volRange.addEventListener("input", () => {
+    cancelarFade(); // ← nova linha
+    audio.volume = Number(volRange.value);
+    pintar(volRange);
+    atualizarIconeVolume();
     });
 
     // Fecha ao clicar fora da barrinha ou apertar Esc
