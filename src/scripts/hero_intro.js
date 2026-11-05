@@ -1,21 +1,21 @@
 // ./scripts/hero_intro.js
 // ===============================================================
 // Animação de entrada da hero: logo + texto letra por letra
+// + troca de texto animada (usada na virada do dia 5 → 6)
 // ===============================================================
-// Referência: animação de texto de um site do Awwwards.
-//
 // Como funciona:
 //  1. O SplitText (GSAP) quebra o texto em linhas, palavras e letras.
 //     Cada LINHA vira uma "máscara" (recorta o que passar da altura dela).
 //  2. As letras começam abaixo da máscara (invisíveis) e SOBEM uma depois da
-//     outra, com um easing forte no final (expo.out), como na referência.
+//     outra, com um easing forte no final (expo.out).
 //  3. A logo aparece antes, "subindo" junto com uma cortina que abre de baixo
-//     para cima (clip-path), no mesmo vocabulário visual do texto.
-//  4. Tudo espera DOIS sinais: a fonte Pacifico carregada (senão as linhas
-//     seriam medidas com a fonte errada) e o pré-loader começando a sumir.
-//  5. autoSplit: se a janela mudar de tamanho e as linhas quebrarem de outro
-//     jeito, o texto é dividido de novo sozinho, sem reiniciar a animação.
-//  6. prefers-reduced-motion: sem animação, a hero aparece normal.
+//     para cima (clip-path).
+//  4. Tudo espera DOIS sinais: a fonte Pacifico carregada e o pré-loader
+//     começando a sumir.
+//  5. autoSplit: se a janela mudar de tamanho, o texto é dividido de novo sozinho.
+//  6. window.heroTrocarTexto(html): troca o texto e toca a animação de novo
+//     (o main.js usa isso na virada do dia).
+//  7. prefers-reduced-motion: sem animação, a hero aparece normal.
 //
 // Usa o GSAP e o SplitText já carregados pelo index.html (scripts globais).
 // ===============================================================
@@ -44,11 +44,12 @@
         },
 
         texto: {
-            atraso: 0.45,   // s depois da logo começar
-            duracao: 1.1,   // s que CADA letra leva para subir
+            atraso: 0.45,     // s depois da logo começar (só na entrada da página)
+            atrasoTroca: 0.1, // s de espera quando o texto é TROCADO (virada do dia)
+            duracao: 1.1,     // s que CADA letra leva para subir
             ease: "expo.out",
             intervalo: 0.022, // s entre uma letra e a próxima (menor = mais rápido)
-            sobe: 160,      // % da altura da letra: precisa passar da folga da máscara (veja _hero.scss)
+            sobe: 160,        // % da altura da letra: precisa passar da folga da máscara (veja _hero.scss)
         },
 
         // Se o pré-loader demorar a avisar (ou a fonte não carregar), não trava a hero
@@ -57,7 +58,6 @@
 
     // ---------------------------------------------------------------
     // Estado inicial: esconde ANTES de qualquer coisa aparecer
-    // (o pré-loader cobre a tela, mas isto garante que nada pisque)
     // ---------------------------------------------------------------
     gsap.set(logo, {
         clipPath: "inset(100% 0% 0% 0%)", // totalmente recortada (cortina fechada)
@@ -101,12 +101,13 @@
     // ---------------------------------------------------------------
     // Texto: letra por letra
     // ---------------------------------------------------------------
-    let liberado = false; // o pré-loader já saiu?
+    let liberado = false;   // o pré-loader já saiu?
     let animTexto = null;
-    let split = null;     // ← NOVO: guarda a instância do SplitText
+    let split = null;       // instância atual do SplitText
+    let atrasoAtual = CONFIG.texto.atraso;
 
     function montarTexto() {
-        SplitText.create(texto, {
+        split = SplitText.create(texto, {
             type: "lines,words,chars",
             mask: "lines",            // cada linha recorta as letras que ainda estão "embaixo"
             linesClass: "hero__line", // a máscara fica com a classe "hero__line-mask" (veja _hero.scss)
@@ -125,23 +126,34 @@
                         ease: CONFIG.texto.ease,
                         stagger: CONFIG.texto.intervalo,
                     },
-                    CONFIG.texto.atraso
+                    atrasoAtual
                 );
                 return animTexto;
             },
         });
     }
 
-    // Usada pelo main.js para trocar o texto da hero (ex.: virada do dia 5 → 6).
-    // Desfaz a divisão, troca o conteúdo e divide de novo, tocando a animação.
+    // Troca o texto da hero e toca a animação letra por letra de novo.
+    // Chamada pelo main.js na virada do dia.
     window.heroTrocarTexto = function (html) {
+        // Sem a divisão pronta ainda (página acabou de abrir): o montarTexto
+        // vai pegar o texto novo sozinho.
         if (!split) {
-            texto.innerHTML = html; // ainda não foi dividido: o montarTexto pega o novo texto
+            texto.innerHTML = html;
             return;
         }
+
+        // 1) desfaz a divisão atual (e a animação dela)
+        if (animTexto) animTexto.kill();
         split.revert();
         split = null;
+
+        // 2) troca o conteúdo
         texto.innerHTML = html;
+
+        // 3) divide de novo e toca (com pouca espera: a página já está aberta)
+        atrasoAtual = CONFIG.texto.atrasoTroca;
+        liberado = true;
         montarTexto();
     };
 

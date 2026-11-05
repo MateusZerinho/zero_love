@@ -231,3 +231,33 @@
         }
     }
 }
+
+// ===============================
+// Explosão de corações na virada (criada pelo main.js)
+// ===============================
+.hero__burst {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3; // acima do conteúdo da hero (.container usa 2)
+}
+
+.hero__burst-heart {
+    position: absolute;
+    line-height: 1;
+    will-change: transform, opacity;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.hero__burst-anel {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    box-shadow:
+        0 0 24px rgba(255, 143, 168, 0.8),
+        inset 0 0 24px rgba(255, 143, 168, 0.5);
+    will-change: transform, opacity;
+}
