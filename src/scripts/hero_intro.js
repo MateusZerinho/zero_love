@@ -103,6 +103,7 @@
     // ---------------------------------------------------------------
     let liberado = false; // o pré-loader já saiu?
     let animTexto = null;
+    let split = null;     // ← NOVO: guarda a instância do SplitText
 
     function montarTexto() {
         SplitText.create(texto, {
@@ -130,6 +131,19 @@
             },
         });
     }
+
+    // Usada pelo main.js para trocar o texto da hero (ex.: virada do dia 5 → 6).
+    // Desfaz a divisão, troca o conteúdo e divide de novo, tocando a animação.
+    window.heroTrocarTexto = function (html) {
+        if (!split) {
+            texto.innerHTML = html; // ainda não foi dividido: o montarTexto pega o novo texto
+            return;
+        }
+        split.revert();
+        split = null;
+        texto.innerHTML = html;
+        montarTexto();
+    };
 
     // ---------------------------------------------------------------
     // Logo: cortina que abre de baixo para cima + sobe e assenta

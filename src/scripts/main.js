@@ -126,11 +126,19 @@
 feather.replace();
 AOS.init();
 
+// ===============================
 // Contagem regressiva (hero)
 // ===============================
+// Ciclo anual:
+//   até 05/11 00:00        → contagem regressiva até o dia 5
+//   05/11 00:00 → 06/11 00:00 → mensagem de parabéns (contador escondido)
+//   a partir de 06/11 00:00   → contagem recomeça, agora até 05/11 do ano seguinte
 (function () {
-    // 05/11/2026 às 00:00 (mês começa em 0 → 10 = novembro)
-    const dataDoEvento = new Date(2026, 10, 5, 0, 0, 0).getTime();
+    const MES = 10; // mês começa em 0 → 10 = novembro
+    const DIA = 5;
+
+    const TEXTO_CONTAGEM = "O aniversário de namoro do melhor casal começa daqui";
+    const TEXTO_FESTA = "O aniversário de namoro do melhor casal já começou! <br> Parabéns, meu amor! ❤️";
 
     const els = {
         dias: document.getElementById("hcDias"),
@@ -149,17 +157,44 @@ AOS.init();
     const horaEmMs = 1000 * 60 * 60;
     const minutoEmMs = 1000 * 60;
 
-    let intervalo;
+    // Em que fase do ciclo estamos agora?
+    function situacao(agora) {
+        const ano = agora.getFullYear();
+        const inicioFesta = new Date(ano, MES, DIA, 0, 0, 0);     // 00:00 do dia 5
+        const fimFesta = new Date(ano, MES, DIA + 1, 0, 0, 0);    // 00:00 do dia 6
+
+        if (agora < inicioFesta) return { modo: "contagem", alvo: inicioFesta.getTime() };
+        if (agora < fimFesta) return { modo: "festa" };
+        return { modo: "contagem", alvo: new Date(ano + 1, MES, DIA, 0, 0, 0).getTime() };
+    }
+
+    // Troca o texto da hero. Se o hero_intro.js já dividiu o texto em letras,
+    // ele refaz a divisão (e a animação letra por letra toca de novo).
+    function definirTexto(html) {
+        if (!texto) return;
+        if (typeof window.heroTrocarTexto === "function") window.heroTrocarTexto(html);
+        else texto.innerHTML = html;
+    }
+
+    let modoAtual = null;
+
+    function aplicarModo(modo) {
+        if (modo === modoAtual) return;
+        const primeiraVez = modoAtual === null;
+        modoAtual = modo;
+
+        if (grid) grid.hidden = modo === "festa";
+
+        if (modo === "festa") definirTexto(TEXTO_FESTA);
+        else if (!primeiraVez) definirTexto(TEXTO_CONTAGEM); // na 1ª vez o HTML já tem o texto certo
+    }
 
     function atualizar() {
-        const distancia = dataDoEvento - Date.now();
+        const s = situacao(new Date());
+        aplicarModo(s.modo);
+        if (s.modo === "festa") return;
 
-        if (distancia < 0) {
-            clearInterval(intervalo);
-            if (grid) grid.hidden = true;
-            if (texto) texto.innerHTML = "O aniversário de namoro do melhor casal ja começou! <br> Parabéns, meu amor! ❤️";
-            return;
-        }
+        const distancia = s.alvo - Date.now();
 
         els.dias.textContent = pad(Math.floor(distancia / diaEmMs));
         els.horas.textContent = pad(Math.floor((distancia % diaEmMs) / horaEmMs));
@@ -168,7 +203,7 @@ AOS.init();
     }
 
     atualizar(); // já preenche na hora, sem esperar 1s
-    intervalo = setInterval(atualizar, 1000);
+    setInterval(atualizar, 1000); // não para mais: ele que faz a virada do dia 5 → 6
 })();
 
 // ===============================
