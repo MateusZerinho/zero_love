@@ -22,9 +22,18 @@
     list-style: none;
 }
 
-html, body {
-    height: 100%;
-    overflow: hidden;
+// A rolagem nativa precisa ficar LIGADA: o ScrollSmoother só suaviza o movimento,
+// e é ela que faz funcionar as setas do teclado, PageUp/PageDown, Espaço e o
+// autoscroll (botão do meio do mouse).
+// O ScrollSmoother já prende o #smooth-wrapper sozinho (position: fixed).
+html {
+    // esconde a barra de rolagem, mas a página continua rolando
+    scrollbar-width: none;            // Firefox
+    -ms-overflow-style: none;         // Edge antigo
+
+    &::-webkit-scrollbar {
+        display: none;                // Chrome, Edge, Safari
+    }
 }
 
 // Telas de toque: rolagem nativa do navegador, sem ScrollSmoother.

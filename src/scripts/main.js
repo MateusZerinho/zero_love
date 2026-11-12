@@ -666,8 +666,7 @@ const smoother = ehToque
           content: "#smooth-content",
           smooth: 2,
           effects: true,
-          normalizeScroll: true,
-          smoothTouch: 0.1
+          normalizeScroll: false,   // ← era true: ele bloqueava teclado e autoscroll
       });
 
 // Guarda para o pré-loader poder destravar, e já nasce pausado se ele ainda estiver na tela
